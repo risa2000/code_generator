@@ -90,48 +90,42 @@ class CppLanguageElement(object):
     (e.g. is_static for the variable is_virtual for the class method etc.)
     """
 
-    availablePropertiesNames = {"name", "ref_to_parent"}
+    PROPERTIES = {
+        "name",
+        "ref_to_parent"
+    }
 
-    def __init__(self, properties):
+    def __init__(self):
         """
         @param: properties - Basic C++ element properties (name, ref_to_parent)
         class is a parent for method or a member variable
         """
-        self.name = properties.get("name")
-        self.ref_to_parent = properties.get("ref_to_parent")
+        self.name = None
+        self.ref_to_parent = None
 
-    def check_input_properties_names(self, input_property_names):
-        """
-        Ensure that all properties that passed to the CppLanguageElement are recognized.
-        Raise an exception otherwise
-        """
-        unknown_properties = input_property_names.difference(
-            self.availablePropertiesNames
-        )
-        if unknown_properties:
-            raise AttributeError(
-                f"Error: try to initialize {self.__class__.__name__} with unknown property: {repr(unknown_properties)}"
-            )
+    def normalize_properties(self, properties):
+        """Produce properties with normalized names, i.e. substitute "const" with "is_const"."""
+        result = dict()
+        for name, val in properties.items():
+            if name in self.PROPERTIES:
+                result[name] = val
+            if f'is_{name}' in self.PROPERTIES:
+                result[f'is_{name}'] = val
+        return result
 
-    def init_class_properties(self, current_class_properties, input_properties_dict, default_property_value=None):
+    def init_properties(self, input_properties_dict, default_property_value=None):
         """
-        Set default values for all properties not listed in availablePropertiesNames
+        Set default values for all properties not listed in PROPERTIES
         Set values for all properties that are listed in input_properties_dict
-        @param: current_class_properties - all available properties for the C++ element to be generated
         @param: input_properties_dict - values for the initialized properties (e.g. is_const=True)
         @param: default_property_value - value for properties that are not initialized
         (None by default, because of same as False semantic)
         """
-        # Set all properties not listed in availablePropertiesNames to default_property_value
-        for property_name in current_class_properties:
-            attribute_value = getattr(self, property_name, None)
-            if property_name not in CppLanguageElement.availablePropertiesNames and attribute_value is None:
-                setattr(self, property_name, default_property_value)
-
-        # Set all defined properties values (all undefined will be left with defaults)
-        for property_name, propertyValue in input_properties_dict.items():
-            if property_name not in CppLanguageElement.availablePropertiesNames:
-                setattr(self, property_name, propertyValue)
+        # Set all properties not listed in PROPERTIES to default_property_value
+        defaults = dict([(name, default_property_value) for name in self.PROPERTIES if not hasattr(self, name)])
+        defaults.update(self.normalize_properties(input_properties_dict))
+        for name, val in defaults.items():
+            setattr(self, name, val)
 
     def render_to_string(self, cpp):
         """

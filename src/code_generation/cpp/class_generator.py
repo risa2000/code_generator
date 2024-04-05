@@ -44,11 +44,12 @@ class CppClass(CppLanguageElement):
     }
     """
 
-    availablePropertiesNames = {
-                                   "is_struct",
-                                   "documentation",
-                                   "parent_class",
-                               } | CppLanguageElement.availablePropertiesNames
+    PROPERTIES = CppLanguageElement.PROPERTIES | \
+        {
+            "is_struct",
+            "documentation",
+            "parent_class",
+        }
 
     class CppMethod(CppFunction):
         """
@@ -78,24 +79,26 @@ class CppClass(CppLanguageElement):
         }
         """
 
-        availablePropertiesNames = (
-                {
-                    "ret_type",
-                    "is_static",
-                    "is_constexpr",
-                    "is_virtual",
-                    "is_inline",
-                    "is_pure_virtual",
-                    "is_const",
-                    "is_override",
-                    "is_final",
-                    "implementation",
-                    "documentation",
-                } | CppLanguageElement.availablePropertiesNames)
+        PROPERTIES = CppFunction.PROPERTIES | \
+            {
+                "ret_type",
+                "is_static",
+                "is_constexpr",
+                "is_virtual",
+                "is_inline",
+                "is_pure_virtual",
+                "is_const",
+                "is_override",
+                "is_final",
+                "arguments",
+                "implementation",
+                "documentation",
+            }
 
         def __init__(self, **properties):
             # arguments are plain strings
             # e.g. 'int* a', 'const string& s', 'size_t sz = 10'
+            self.ret_type = None
             self.is_static = False
             self.is_constexpr = False
             self.is_virtual = False
@@ -107,15 +110,7 @@ class CppClass(CppLanguageElement):
             self.arguments = []
             self.implementation = properties.get("implementation")
             self.documentation = properties.get("documentation")
-
-            # check properties
-            input_property_names = set(properties.keys())
-            self.check_input_properties_names(input_property_names)
-            super().__init__(**properties)
-            self.init_class_properties(
-                current_class_properties=self.availablePropertiesNames,
-                input_properties_dict=properties,
-            )
+            self.init_properties(properties)
 
         def add_argument(self, argument):
             """
@@ -347,13 +342,7 @@ class CppClass(CppLanguageElement):
         self.is_struct = False
         self.documentation = None
         self.parent_class = None
-        input_property_names = set(properties.keys())
-        self.check_input_properties_names(input_property_names)
-        super(CppClass, self).__init__(properties)
-        self.init_class_properties(
-            current_class_properties=self.availablePropertiesNames,
-            input_properties_dict=properties,
-        )
+        self.init_properties(properties)
 
         # aggregated classes
         self.internal_class_elements = []

@@ -78,26 +78,28 @@ class CppVariable(CppLanguageElement):
     is_class_member - boolean, for appropriate definition/declaration rendering
     """
 
-    availablePropertiesNames = (
-            {
-                "type",
-                "is_static",
-                "is_extern",
-                "is_const",
-                "is_constexpr",
-                "value",
-                "documentation",
-                "is_class_member",
-            } | CppLanguageElement.availablePropertiesNames)
+    PROPERTIES = CppLanguageElement.PROPERTIES | \
+        {
+            "type",
+            "is_static",
+            "is_extern",
+            "is_const",
+            "is_constexpr",
+            "is_class_member",
+            "value",
+            "documentation",
+        }
 
     def __init__(self, **properties):
-        input_property_names = set(properties.keys())
-        self.check_input_properties_names(input_property_names)
-        super(CppVariable, self).__init__(properties)
-        self.init_class_properties(
-            current_class_properties=self.availablePropertiesNames,
-            input_properties_dict=properties,
-        )
+        self.type = None
+        self.is_static = False
+        self.is_extern = False
+        self.is_const = False
+        self.is_constexpr = False
+        self.is_class_member = False
+        self.value = None
+        self.documentation = None
+        self.init_properties(properties)
 
     def assignment(self, value):
         """

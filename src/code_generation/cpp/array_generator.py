@@ -33,18 +33,16 @@ class CppArray(CppLanguageElement):
     Methods simply returning string representation of the element start from '_'
     """
 
-    availablePropertiesNames = (
-            {
-                "type",
-                "is_static",
-                "static",
-                "is_const",
-                "const",
-                "is_class_member",
-                "class_member",
-                "array_size",
-                "newline_align",
-            } | CppLanguageElement.availablePropertiesNames)
+    PROPERTIES = CppLanguageElement.PROPERTIES | \
+        {
+            "type",
+            "is_static",
+            "is_const",
+            "is_class_member",
+            "array_size",
+            "newline_align",
+            "items",
+        }
 
     def __init__(self, **properties):
         self.is_static = False
@@ -52,17 +50,9 @@ class CppArray(CppLanguageElement):
         self.is_class_member = False
         self.array_size = 0
         self.newline_align = None
-
         # array elements
         self.items = []
-
-        input_property_names = set(properties.keys())
-        self.check_input_properties_names(input_property_names)
-        super(CppArray, self).__init__(properties)
-        self.init_class_properties(
-            current_class_properties=self.availablePropertiesNames,
-            input_properties_dict=properties,
-        )
+        self.init_properties(properties)
 
     def declaration(self):
         """

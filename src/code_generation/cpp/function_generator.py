@@ -27,31 +27,24 @@ class CppFunction(CppLanguageElement):
     }
     """
 
-    availablePropertiesNames = (
-            {
-                "ret_type",
-                "is_constexpr",
-                "implementation",
-                "documentation",
-            } | CppLanguageElement.availablePropertiesNames)
+    PROPERTIES = CppLanguageElement.PROPERTIES | \
+        {
+            "ret_type",
+            "is_constexpr",
+            "arguments",
+            "implementation",
+            "documentation",
+        }
 
     def __init__(self, **properties):
         # arguments are plain strings
         # e.g. 'int* a', 'const string& s', 'size_t sz = 10'
-        self.arguments = []
         self.ret_type = None
+        self.is_constexpr = False
+        self.arguments = []
         self.implementation = None
         self.documentation = None
-        self.is_constexpr = False
-
-        # check properties
-        input_property_names = set(properties.keys())
-        self.check_input_properties_names(input_property_names)
-        super(CppFunction, self).__init__(properties)
-        self.init_class_properties(
-            current_class_properties=self.availablePropertiesNames,
-            input_properties_dict=properties,
-        )
+        self.init_properties(properties)
 
     def _sanity_check(self):
         """
