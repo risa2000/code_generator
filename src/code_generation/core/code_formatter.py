@@ -7,8 +7,6 @@ __doc__ = """Formatters for different styles of code generation
 class CodeFormat(Enum):
     DEFAULT = auto()
     ANSI_CPP = auto()
-    HTML = auto()
-    CUSTOM = auto()
 
 
 class CodeLayout:
@@ -90,68 +88,6 @@ class ANSICodeFormatter(CodeFormatter):
         self.owner.line("}" + self.postfix)
 
 
-class HTMLCodeFormatter(CodeFormatter):
-    """
-    Class representing HTML close and its formatting style.
-    It supports HTML DOM-tree style, like that:
-    // HTML code
-    <element attributes>
-        // HTML content
-    </element>
-    """
-
-    # Tab (indentation) symbol is 2 spaces
-    html_indent = "  "
-
-    def __init__(self, owner, element, *attrs, **kwattrs):
-        """
-        HTML code line
-        Note that some attributes like 'class' are conflicting with Python's 'class' keyword.
-        For such attributes prefer passing by list of strings `attrs`, e.g. `['class="class1"', 'id="id1"']`
-        For other attributes prefer passing by dictionary `kwattrs`, e.g. `{id="id1"}`
-        @param: owner - SourceFile where text is written to
-        @param: element - HTML element name
-        @param: attrs - optional opening tag content, e.g. attributes ['class="class1"', 'id="id1"']
-        @param: kwattrs - optional opening tag attributes, e.g. {id="id1"}
-        """
-        super().__init__(indent=self.html_indent)
-        self.owner = owner
-        if self.owner.last is not None:
-            with self.owner.last:
-                pass
-        self.element = element
-        attributes = ""
-        if "attributes" in kwattrs:
-            if isinstance(kwattrs["attributes"], dict):
-                attributes = "".join(
-                    f' {key}="{value}"' for key, value in kwattrs["attributes"].items()
-                )
-            del kwattrs["attributes"]
-        else:
-            attributes = "".join(f" {attr}" for attr in attrs)
-            attributes += "".join(f' {key}="{value}"' for key, value in kwattrs.items())
-        self.attributes = attributes
-        self.owner.last = self
-
-    def __enter__(self):
-        """
-        Open code block
-        """
-        self.owner.line(f"<{self.element}{self.attributes}>")
-        self.owner.current_indent += 1
-        self.owner.last = None
-
-    def __exit__(self, *_):
-        """
-        Close code block
-        """
-        if self.owner.last is not None:
-            with self.owner.last:
-                pass
-        self.owner.current_indent -= 1
-        self.owner.line(f"</{self.element}>")
-
-
 class CodeFormatterFactory:
     """
     Factory class for code formatters
@@ -170,10 +106,6 @@ class CodeFormatterFactory:
         """
         if code_format == CodeFormat.ANSI_CPP:
             return ANSICodeFormatter(owner=owner, text=text, *args, **kwargs)
-        elif code_format == CodeFormat.HTML:
-            return HTMLCodeFormatter(owner=owner, text=text, *args, **kwargs)
-        elif code_format == CodeFormat.CUSTOM:
-            return CodeFormatter(*args, **kwargs)
         elif code_format == CodeFormat.DEFAULT:
             # TODO: leave default formatter for respective source file
             return CodeFormatter(*args, **kwargs)

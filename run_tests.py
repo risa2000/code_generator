@@ -4,11 +4,6 @@ __doc__ = """Run following tests:
         python test.cpp.test_cpp_class_writer
         python test.cpp.test_cpp_function_writer
         python test.cpp.test_cpp_variable_writer
-        python test.java.test_java_array_writer
-        python test.java.test_java_enum_writer
-        python test.java.test_java_class_writer
-        python test.java.test_java_function_writer
-        python test.java.test_java_variable_writer
 """
 
 import subprocess
@@ -41,11 +36,6 @@ if __name__ == "__main__":
         "test.cpp.test_cpp_class_writer",
         "test.cpp.test_cpp_function_writer",
         "test.cpp.test_cpp_variable_writer",
-        "test.java.test_java_array_writer",
-        "test.java.test_java_enum_writer",
-        "test.java.test_java_class_writer",
-        "test.java.test_java_function_writer",
-        "test.java.test_java_variable_writer"
     ]
 
     for _ in range(1, 3):
