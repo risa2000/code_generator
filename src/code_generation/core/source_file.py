@@ -75,13 +75,12 @@ class SourceFile:
         @param: formatter code formatter to define rules of code indentation and line ending
         @param: writer optional writer to write output to
         """
-        self.current_indent = 0
-        self.last = None
         self.filename = filename
         if not isinstance(formatter, CodeFormat) and formatter is not None:
             raise TypeError(f"code_format must be an instance of {CodeFormat.__name__}")
         self.formatter = formatter if formatter is not None else CodeFormat.DEFAULT
         self.out = writer if writer is not None else open(filename, "w")
+        self.code_formatter = CodeFormatterFactory.get_code_formatter(self.formatter)
 
     def close(self):
         """
@@ -94,13 +93,7 @@ class SourceFile:
         """
         Write a new line with line ending
         """
-        self.out.write(self.code_formatter.line(text, indent, endline))
-
-    def append(self, x):
-        """
-        Append to the existing line without line ending
-        """
-        self.out.write(x)
+        self.code_formatter(self.out).line(text, indent, endline)
 
     def __call__(self, text, indent=0, endline=True):
         """
@@ -110,21 +103,15 @@ class SourceFile:
         """
         self.write(text, indent, endline)
 
-    def block(self, text, postfix=None):
+    def block(self, text, endline=True, postfix=None):
         """
         Returns a stub for C++ {} close
         Supports 'with' semantic, i.e.
         with cpp.block(class_name, ';'):
         """
         if postfix is None:
-            postfix = self.code_formatter.postfix
-        return self.code_formatter(self, text, postfix)
-
-    def endline(self, count=1):
-        """
-        Insert an endline
-        """
-        self.write(text=self.code_formatter.endline * count, indent=0, endline=False)
+            postfix = self.code_formatter.code_layout.postfix
+        return self.code_formatter(self.out, text=text, endline=endline, postfix=postfix)
 
     def newline(self, n=1):
         """

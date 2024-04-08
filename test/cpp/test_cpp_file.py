@@ -84,10 +84,10 @@ class TestCppFileIo(unittest.TestCase):
         my_class.add_array(a2)
         my_class.add_array(a3)
 
-        def const_method_body(_, cpp):
+        def const_method_body(cpp):
             cpp('return m_var1;')
 
-        def virtual_method_body(_, cpp):
+        def virtual_method_body(cpp):
             cpp('return 0;')
 
         my_class.add_method(CppClass.CppMethod(name="GetParam",
@@ -144,7 +144,7 @@ class TestCppFileIo(unittest.TestCase):
         cpp = CppSourceFile('func.cpp')
         hpp = CppSourceFile('func.h')
 
-        def function_body(_, cpp1):
+        def function_body(cpp1):
             cpp1('return 42;')
 
         functions = [CppFunction(name='GetParam', ret_type='int'),

@@ -45,11 +45,12 @@ class CppArray(CppLanguageElement):
         }
 
     def __init__(self, **properties):
+        self.type = None
         self.is_static = False
         self.is_const = False
         self.is_class_member = False
         self.array_size = 0
-        self.newline_align = None
+        self.newline_align = False
         # array elements
         self.items = []
         self.init_properties(properties)
@@ -82,6 +83,22 @@ class CppArray(CppLanguageElement):
         """
         self.items.extend(items)
 
+    def decl_to_string(self):
+        lhr = [
+            f"{self._modifiers()}",
+            f"{self.type}",
+            f"{self.name}[{self._size()}]",
+        ]
+        return " ".join(h for h in lhr if h)
+
+    def full_decl_to_string(self):
+        lhr = [
+            f"{self._modifiers()}",
+            f"{self.type}",
+            f"{self.fully_qualified_name()}[{self._size()}]",
+        ]
+        return " ".join(h for h in lhr if h)
+
     def render_to_string(self, cpp):
         """
         Generates definition for the C++ array.
@@ -100,25 +117,11 @@ class CppArray(CppLanguageElement):
 
         # newline-formatting of array elements makes sense only if array is not empty
         if self.newline_align and self.items:
-            with cpp.block(
-                    f"{self._modifiers()} "
-                    f"{self.type} "
-                    f"{self.name}"
-                    f"[{self._size()}]"
-                    f" = ",
-                    postfix=";"
-            ):
+            with cpp.block(f'{self.decl_to_string()} =', endline=False, postfix=";") as block:
                 # render array items
-                self._render_value(cpp)
+                self._render_value(block)
         else:
-            cpp(
-                f"{self._modifiers()} "
-                f"{self.type} "
-                f"{self.name}"
-                f"[{self._size()}]"
-                f" = "
-                f"{{{self._content()}}};"
-            )
+            cpp(f'{self.decl_to_string()} = {{{self._content()}}};')
 
     def render_to_string_declaration(self, cpp):
         """
@@ -131,12 +134,7 @@ class CppArray(CppLanguageElement):
         self._sanity_check()
         if not self.is_class_member:
             raise RuntimeError("For automatic variable use its render_to_string() method")
-        cpp(
-            f"{self._modifiers()} "
-            f"{self.type} "
-            f"{self.name}"
-            f"[{self._size()}];"
-        )
+        cpp(f'{self.decl_to_string()};')
 
     def render_to_string_implementation(self, cpp):
         """
@@ -162,25 +160,11 @@ class CppArray(CppLanguageElement):
 
         # newline-formatting of array elements makes sense only if array is not empty
         if self.newline_align and self.items:
-            with cpp.block(
-                    f"{self._const()}"
-                    f"{self.type} "
-                    f"{self.fully_qualified_name()}"
-                    f"[{self._size()}]"
-                    f" = ",
-                    postfix=";"
-            ):
+            with cpp.block(f'{self.full_decl_to_string()} =', endline=False, postfix=';') as block:
                 # render array items
-                self._render_value(cpp)
+                self._render_value(block)
         else:
-            cpp(
-                f"{self._const()}"
-                f"{self.type} "
-                f"{self.fully_qualified_name()}"
-                f"[{self._size()}]"
-                f" = "
-                f"{{{self._content()}}};"
-            )
+            cpp(f'{self.full_decl_to_string()} = {{{self._content()}}};')
 
     def _sanity_check(self):
         """

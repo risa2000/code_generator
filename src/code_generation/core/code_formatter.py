@@ -46,46 +46,64 @@ class ANSICodeFormatter(CodeFormatter):
     finishing postfix is optional (e.g. necessary for classes, unnecessary for namespaces)
     """
 
-    def __init__(self, owner, text, code_layout=None):
+    def __init__(self, writer, text = None, indent = None, endline = True, postfix = None, code_layout=None):
         """
         @param: owner - SourceFile where text is written to
         @param: text - text opening C++ close
         """
         super().__init__()
-        self.owner = owner
-        if self.owner.last is not None:
-            with self.owner.last:
-                pass
-        self.owner.line("".join(text))
-        self.owner.last = self
+        self.writer = writer
+        self.code_layout = code_layout or CodeLayout()
+        self.indent_level = 0 if indent is None else indent
+        if isinstance(text, (list, tuple)):
+            self.text = ''.join(text)
+        else:
+            self.text = text
+        self.endline = endline
+        self.postfix = postfix is None and self.code_layout.postfix or postfix
 
-    def line(self, text, indent_level=0, endline=None):
-        """
-        Write a new line with line ending
-        """
-        return (
-            f"{self.indent * indent_level}"
-            f"{text}"
-            f"{self.endline if endline is None else endline}"
-        )
+    def __call__(self, text, indent=None, endline=True):
+        self.line(text, indent=indent, endline=endline)
 
     def __enter__(self):
-        """
-        Open code block
-        """
-        self.owner.line("{")
-        self.owner.current_indent += 1
-        self.owner.last = None
+        """Open code block."""
+        if self.endline:
+            self.line(self.text, endline=self.endline)
+            self.line("{")
+        else:
+            text = self.text and f'{self.text} ' or ''
+            self.line(f'{text}{{')
+        self.indent_level += 1
+        return self
 
     def __exit__(self, *_):
+        """Close code block."""
+        self.indent_level -= 1
+        self.line("}" + self.postfix)
+
+    def line(self, text, indent=None, endline=True):
+        """Write one line into writer."""
+        if indent is None:
+            indent =  self.indent_level
+        self.writer.write(
+            f"{self.code_layout.indent * indent}"
+            f"{text}"
+            f"{self.code_layout.endline if endline else ''}"
+        )
+
+    def block(self, text, endline=True, postfix=None):
+        return ANSICodeFormatter(writer=self.writer, text=text, indent=self.indent_level, endline=endline, postfix=postfix, code_layout=self.code_layout)
+
+    def label(self, text):
+        """Write C/C++ code label."""
+        self.line(f"{text}:", self.indent_level - 1)
+
+    def newline(self, n=1):
         """
-        Close code block
+        Insert one or several empty lines
         """
-        if self.owner.last is not None:
-            with self.owner.last:
-                pass
-        self.owner.current_indent -= 1
-        self.owner.line("}" + self.postfix)
+        for _ in range(n):
+            self.line(text='', indent=0)
 
 
 class CodeFormatterFactory:
@@ -94,20 +112,16 @@ class CodeFormatterFactory:
     """
 
     @staticmethod
-    def create(code_format, owner, text, *args, **kwargs):
+    def get_code_formatter(code_format, code_layout=None) -> CodeFormatter:
         """
         Create a new code formatter
-        :param owner: source file where formatter is created
-        :param text: code to format
         :param code_format: code formatter type
-        :param args: formatter arguments
-        :param kwargs: formatter keyword arguments
-        :return: new code formatter
         """
+        code_layout = code_layout is not None and code_layout or CodeLayout()
         if code_format == CodeFormat.ANSI_CPP:
-            return ANSICodeFormatter(owner=owner, text=text, *args, **kwargs)
+            return type('Formatter', (ANSICodeFormatter,), {'code_layout': code_layout})
         elif code_format == CodeFormat.DEFAULT:
             # TODO: leave default formatter for respective source file
-            return CodeFormatter(*args, **kwargs)
+            return type('Formatter', (CodeFormatter,), {'code_layout': CodeLayout})
         else:
             raise ValueError(f"Unknown code format: {code_format}")

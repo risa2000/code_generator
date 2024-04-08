@@ -33,10 +33,8 @@ cpp_class.add_variable(
     )
 )
 
-
 def method_body(c):
     c('return m_var;')
-
 
 cpp_class.add_method(
     CppClass.CppMethod(
@@ -47,4 +45,16 @@ cpp_class.add_method(
     )
 )
 
+class2 = CppClass(name='Class2')
+class2.add_method(
+    CppClass.CppMethod(
+        name='GetInternal',
+        ret_type = 'std::string',
+        virtual = True,
+        implementation=lambda c: c('return "impl";'),
+    )
+)
+
+cpp_class.add_internal_class(class2)
+cpp_class.add_variable(CppVariable(name='m_name', type='std::string'))
 cpp_class.render_to_string(cpp)

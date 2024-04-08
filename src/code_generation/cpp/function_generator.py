@@ -60,6 +60,14 @@ class CppFunction(CppLanguageElement):
         """
         return "constexpr" if self.is_constexpr else ""
 
+    def short_header_declaration_to_string(self):
+        header = [
+            f"{self._constexpr()}",
+            f"{self.ret_type}",
+            f"{self.name}({self.args()})",
+        ]
+        return " ".join(h for h in header if h)
+        
     def args(self):
         """
         @return: string arguments
@@ -77,7 +85,7 @@ class CppFunction(CppLanguageElement):
         The method calls Python function that creates C++ method body if handle exists
         """
         if self.implementation is not None:
-            self.implementation(self, cpp)
+            self.implementation(cpp)
 
     def declaration(self):
         """
@@ -94,24 +102,13 @@ class CppFunction(CppLanguageElement):
         return CppImplementation(self)
 
     def render_to_string(self, cpp):
-        """
-        By function method is rendered as a declaration together with implementation
-        void f()
-        {
-            ...
-        }
-        """
+        """Function is rendered as with implementation """
         # check all properties for the consistency
         self._sanity_check()
         if self.documentation:
             cpp(dedent(self.documentation))
-        with cpp.block(
-                f"{self._constexpr()}"
-                f"{self.ret_type} "
-                f"{self.name}"
-                f"({self.args()})"
-        ):
-            self.implementation(cpp)
+        with cpp.block(self.short_header_declaration_to_string(), endline=False) as block:
+            self.body(block)
 
     def render_to_string_declaration(self, cpp):
         """
@@ -126,34 +123,8 @@ class CppFunction(CppLanguageElement):
                 cpp(dedent(self.documentation))
             self.render_to_string(cpp)
         else:
-            cpp(
-                f"{self._constexpr()} "
-                f"{self.ret_type} "
-                f"{self.name}"
-                f"({self.args()});"
-            )
+            cpp(f'{self.short_header_declaration_to_string()};')
 
     def render_to_string_implementation(self, cpp):
-        """
-        Special case for a function implementation string representation.
-        Generates function string in the form
-        Example:
-        int GetX() const
-        {
-        ...
-        }
-        Generates method body if `self.implementation` property exists
-        """
-        if self.implementation is None:
-            raise RuntimeError(f"No implementation handle for the function {self.name}")
-
-        # check all properties for the consistency
-        if self.documentation and not self.is_constexpr:
-            cpp(dedent(self.documentation))
-        with cpp.block(
-                f"{self._constexpr()} "
-                f"{self.ret_type} "
-                f"{self.name}"
-                f"({self.args()})"
-        ):
-            self.implementation(cpp)
+        if not self.is_constexpr:
+            self.render_to_string(cpp)

@@ -26,9 +26,8 @@ class TestCppFunctionStringIo(unittest.TestCase):
         func.add_argument('int n')
         func.render_to_string(cpp)
         self.assertIn(dedent("""\
-            int factorial(int n)
-            {
-            \treturn n < 1 ? 1 : (n * factorial(n - 1));
+            int factorial(int n) {
+                return n < 1 ? 1 : (n * factorial(n - 1));
             }"""), writer.getvalue())
 
     def test_is_constexpr_no_implementation_raises(self):
@@ -45,9 +44,8 @@ class TestCppFunctionStringIo(unittest.TestCase):
         func.add_argument('int n')
         func.render_to_string(cpp)
         self.assertIn(dedent("""\
-            constexpr int factorial(int n)
-            {
-            \treturn n < 1 ? 1 : (n * factorial(n - 1));
+            constexpr int factorial(int n) {
+                return n < 1 ? 1 : (n * factorial(n - 1));
             }"""), writer.getvalue())
 
     def test_is_constexpr_render_to_string_declaration(self):
@@ -58,9 +56,8 @@ class TestCppFunctionStringIo(unittest.TestCase):
         func.add_argument('int n')
         func.render_to_string_declaration(cpp)
         self.assertIn(dedent("""\
-            constexpr int factorial(int n)
-            {
-            \treturn n < 1 ? 1 : (n * factorial(n - 1));
+            constexpr int factorial(int n) {
+                return n < 1 ? 1 : (n * factorial(n - 1));
             }"""), writer.getvalue())
 
     def test_docstring_example(self):
@@ -73,9 +70,8 @@ class TestCppFunctionStringIo(unittest.TestCase):
         factorial_function.render_to_string(cpp)
         self.assertIn(dedent("""\
             /// Calculates and returns the factorial of p @n.
-            constexpr int factorial(int n)
-            {
-            \treturn n < 1 ? 1 : (n * factorial(n - 1));
+            constexpr int factorial(int n) {
+                return n < 1 ? 1 : (n * factorial(n - 1));
             }"""), writer.getvalue())
 
 

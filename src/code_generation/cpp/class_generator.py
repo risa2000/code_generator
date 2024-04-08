@@ -144,6 +144,25 @@ class CppClass(CppLanguageElement):
             for definition rendering using render_to_string(cpp) interface
             """
             return CppImplementation(self)
+        
+        def short_header_declaration_to_string(self):
+            header = [
+                f"{self._static()}",
+                f"{self._modifiers_front()}",
+                f"{self._ret_type()}",
+                f"{self.name}({self.args()})",
+                f"{self._modifiers_back()}",
+                f"{self._pure()}",
+            ]
+            return " ".join(h for h in header if h)
+        
+        def full_header_implementation_to_string(self):
+            header = [
+                f"{self._ret_type()}",
+                f"{self.fully_qualified_name()}({self.args()})",
+                f"{self._const()}",
+            ]
+            return " ".join(h for h in header if h)
 
         def render_to_string(self, cpp):
             """
@@ -161,16 +180,8 @@ class CppClass(CppLanguageElement):
             self._sanity_check()
             if self.documentation:
                 cpp(dedent(self.documentation))
-            with cpp.block(
-                    f"{self._static()}"
-                    f"{self._modifiers_front()}"
-                    f"{self._ret_type()} "
-                    f"{self.fully_qualified_name()}"
-                    f"({self.args()})"
-                    f"{self._modifiers_back()}"
-                    f"{self._pure()}"
-            ):
-                self.implementation(cpp)
+            with cpp.block(self.short_header_declaration_to_string()) as block:
+                self.implementation(block)
 
         def render_to_string_declaration(self, cpp):
             """
@@ -186,15 +197,7 @@ class CppClass(CppLanguageElement):
                     cpp(dedent(self.documentation))
                 self.render_to_string(cpp)
             else:
-                cpp(
-                    f"{self._static()}"
-                    f"{self._modifiers_front()} "
-                    f"{self._ret_type()} "
-                    f"{self.name}"
-                    f"({self.args()})"
-                    f"{self._modifiers_back()}"
-                    f"{self._pure()};"
-                )
+                cpp(f'{self.short_header_declaration_to_string()};')
 
         def render_to_string_implementation(self, cpp):
             """
@@ -218,14 +221,8 @@ class CppClass(CppLanguageElement):
 
             if self.documentation and not self.is_constexpr:
                 cpp(dedent(self.documentation))
-            with cpp.block(
-                    f"{self._modifiers_front()}"
-                    f"{self._ret_type()} "
-                    f"{self.fully_qualified_name()}"
-                    f"({self.args()})"
-                    f"{self._modifiers_back()}"
-            ):
-                self.implementation(cpp)
+            with cpp.block(self.full_header_implementation_to_string()) as block:
+                self.implementation(block)
 
         def _sanity_check(self):
             """
@@ -483,32 +480,26 @@ class CppClass(CppLanguageElement):
             for variable in self.variable_members
             if variable.is_static
         ]
+
         for var_item in static_vars:
             var_item.definition().render_to_string(cpp)
             cpp.newline()
+
         for arr_item in self.array_members:
             arr_item.definition().render_to_string(cpp)
             cpp.newline()
 
-        # do the same for nested classes
-        for class_item in self.internal_class_elements:
-            class_item.render_static_members_implementation(cpp)
-            cpp.newline()
-
     def render_methods_implementation(self, cpp):
-        """
-        Generates all class methods declaration
-        Should be placed in 'public:' section
-        Method is public, as it could be used for nested classes
-        """
         # generate methods implementation section
         for func_item in self.methods:
             if not func_item.is_pure_virtual:
                 func_item.render_to_string_implementation(cpp)
                 cpp.newline()
+
+    def render_internal_classes_implementation(self, cpp):
         # do the same for nested classes
         for class_item in self.internal_class_elements:
-            class_item.render_static_members_implementation(cpp)
+            class_item.render_to_string_implementation(cpp)
             cpp.newline()
 
     def render_to_string(self, cpp):
@@ -532,12 +523,12 @@ class CppClass(CppLanguageElement):
         if self._parent_class():
             render_str += self.inherits()
 
-        with cpp.block(render_str, postfix=";"):
+        with cpp.block(render_str, postfix=";") as block:
             # in case of struct all members meant to be public
             if not self.is_struct:
-                cpp.label("public")
-            self.class_interface(cpp)
-            self.private_class_members(cpp)
+                block.label("public")
+            self.class_interface(block)
+            self.private_class_members(block)
         cpp.newline()
 
     def render_to_string_implementation(self, cpp):
@@ -547,6 +538,7 @@ class CppClass(CppLanguageElement):
         """
         self.render_static_members_implementation(cpp)
         self.render_methods_implementation(cpp)
+        self.render_internal_classes_implementation(cpp)
 
     def declaration(self):
         """

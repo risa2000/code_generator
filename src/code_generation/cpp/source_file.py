@@ -12,11 +12,12 @@ class CppSourceFile(SourceFile):
 
     default_formatter = CodeFormat.ANSI_CPP
 
-    def __init__(self, filename, writer=None):
+    def __init__(self, filename, formatter=None, writer=None):
         """
         Create C++ source file
         """
-        SourceFile.__init__(self, filename, writer)
+        formatter = formatter is None and self.default_formatter or formatter
+        SourceFile.__init__(self, filename, formatter=formatter, writer=writer)
 
     def label(self, text):
         """
@@ -24,4 +25,4 @@ class CppSourceFile(SourceFile):
         private:
         a:
         """
-        self.write("{0}:".format(text), -1)
+        self.write('f{text}:')

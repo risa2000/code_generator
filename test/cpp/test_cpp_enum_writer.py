@@ -22,8 +22,7 @@ class TestCppEnumStringIo(unittest.TestCase):
         enum.add_items(["Chair", "Table", "Shelve"])
         enum.render_to_string(cpp)
         expected_output = dedent("""\
-            enum Items
-            {
+            enum Items {
                 eChair = 0,
                 eTable = 1,
                 eShelve = 2,
@@ -44,8 +43,7 @@ class TestCppEnumStringIo(unittest.TestCase):
         enum.add_items(["A", "B", "C"])
         enum.render_to_string(cpp)
         expected_output = dedent("""\
-            enum Items
-            {
+            enum Items {
                 PrefixA = 0,
                 PrefixB = 1,
                 PrefixC = 2,
@@ -66,8 +64,7 @@ class TestCppEnumStringIo(unittest.TestCase):
         enum.add_items(["A", "B", "C"])
         enum.render_to_string(cpp)
         expected_output = dedent("""\
-            enum class Items
-            {
+            enum class Items {
                 eA = 0,
                 eB = 1,
                 eC = 2,

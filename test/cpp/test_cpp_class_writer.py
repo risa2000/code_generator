@@ -201,8 +201,7 @@ class TestCppClassStringIo(unittest.TestCase):
             class MyClass
             {
             public:
-                enum Items
-                {
+                enum Items {
                     eItem1 = 0,
                     eItem2 = 1,
                     eItem3 = 2,
@@ -242,7 +241,7 @@ class TestCppClassStringIo(unittest.TestCase):
             public:
                 static const char* Array[];
             };
-            const char* MyClass::Array[] = {Item1, Item2, Item3};""")
+            static const char* MyClass::Array[] = {Item1, Item2, Item3};""")
 
         # Assert the output matches the expected output
         actual_output = writer.getvalue().strip()

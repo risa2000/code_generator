@@ -33,7 +33,7 @@ class CppEnum(CppLanguageElement):
     PROPERTIES = CppLanguageElement.PROPERTIES | \
         {
             "prefix",
-            "enum_class",
+            "is_enum_class",
             "add_counter",
             "enum_items",
         }
@@ -57,12 +57,19 @@ class CppEnum(CppLanguageElement):
         """
         self.enum_items.extend(items)
 
+    def short_header_declaration_to_string(self):
+        header = [
+            "enum",
+            f"{self._enum_class()}",
+            f"{self.name}",
+        ]
+        return " ".join(h for h in header if h)
+
     def render_to_string(self, cpp):
         """
         Generates a string representation for the enum
         It always contains a terminating value that shows count of enum elements
-        enum MyEnum
-        {
+        enum MyEnum {
             eItem1 = 0,
             eItem2 = 1,
             eMyEnumCount = 2
@@ -70,13 +77,13 @@ class CppEnum(CppLanguageElement):
         """
         counter = 0
         final_prefix = self.prefix if self.prefix is not None else "e"
-        with cpp.block(f"enum {self._enum_class()}{self.name}", postfix=";"):
+        with cpp.block(self.short_header_declaration_to_string(), endline=False, postfix=";") as block:
             for item in self.enum_items:
-                cpp(f"{final_prefix}{item} = {counter},")
+                block(f"{final_prefix}{item} = {counter},")
                 counter += 1
             if self.add_counter in [None, True]:
                 last_element = f"{final_prefix}{self.name}Count = {counter}"
-                cpp(last_element)
+                block(last_element)
 
     def _enum_class(self):
-        return "class " if self.is_enum_class else ""
+        return "class" if self.is_enum_class else ""

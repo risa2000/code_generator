@@ -22,11 +22,11 @@ Expected output:
 
 """
 
-cpp = CppSourceFile('array.cpp')
+cpp = CppSourceFile('enum.cpp')
 enum = CppEnum(name="MyEnum", prefix="e")
 enum.add_items(["Item1", "Item2", "Item3"])
 enum.render_to_string(cpp)
 
-enum = CppEnum(name="MyEnumClass", prefix="e", enum_class=True)
+enum = CppEnum(name="MyEnumClass", prefix="e", enum_class=True, )
 enum.add_items(["Item1", "Item2", "Item3"])
 enum.render_to_string(cpp)

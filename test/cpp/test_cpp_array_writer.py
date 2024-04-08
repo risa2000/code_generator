@@ -31,8 +31,7 @@ class TestCppArrayStringIo(unittest.TestCase):
         arr.add_array_items(["1", "2", "0"])
         arr.render_to_string(cpp)
         generated_output = writer.getvalue().strip()
-        expected_output = dedent("""int my_array[5] = 
-            {
+        expected_output = dedent("""int my_array[5] = {
                 1,
                 2,
                 0
@@ -56,7 +55,7 @@ class TestCppArrayStringIo(unittest.TestCase):
                        is_class_member=True, is_static=True)
         arr.add_array_items(["1", "2", "0"])
         arr.render_to_string_implementation(cpp)
-        expected_output = "int m_my_static_array[] = {1, 2, 0};"
+        expected_output = "static int m_my_static_array[] = {1, 2, 0};"
         self.assertEqual(expected_output, writer.getvalue().strip())
 
     def test_missing_type(self):
