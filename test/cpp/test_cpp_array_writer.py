@@ -31,11 +31,13 @@ class TestCppArrayStringIo(unittest.TestCase):
         arr.add_array_items(["1", "2", "0"])
         arr.render_to_string(cpp)
         generated_output = writer.getvalue().strip()
-        expected_output = dedent("""int my_array[5] = {
+        expected_output = dedent(
+            """int my_array[5] = {
                 1,
                 2,
                 0
-            };""")
+            };"""
+        )
         expected_output_normalized = normalize_lines(expected_output)
         generated_output_normalized = normalize_lines(generated_output)
         self.assertEqual(expected_output_normalized, generated_output_normalized)
@@ -43,7 +45,12 @@ class TestCppArrayStringIo(unittest.TestCase):
     def test_declaration(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
-        arr = CppArray(name="my_class_member_array", type="int", array_size=None, is_class_member=True)
+        arr = CppArray(
+            name="my_class_member_array",
+            type="int",
+            array_size=None,
+            is_class_member=True,
+        )
         arr.render_to_string_declaration(cpp)
         expected_output = "int my_class_member_array[];"
         self.assertEqual(expected_output, writer.getvalue().strip())
@@ -51,8 +58,13 @@ class TestCppArrayStringIo(unittest.TestCase):
     def test_implementation(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
-        arr = CppArray(name="m_my_static_array", type="int", array_size=None,
-                       is_class_member=True, is_static=True)
+        arr = CppArray(
+            name="m_my_static_array",
+            type="int",
+            array_size=None,
+            is_class_member=True,
+            is_static=True,
+        )
         arr.add_array_items(["1", "2", "0"])
         arr.render_to_string_implementation(cpp)
         expected_output = "static int m_my_static_array[] = {1, 2, 0};"

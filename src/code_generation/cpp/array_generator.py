@@ -1,4 +1,8 @@
-from code_generation.cpp.language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from code_generation.cpp.language_element import (
+    CppLanguageElement,
+    CppDeclaration,
+    CppImplementation,
+)
 
 
 # noinspection PyUnresolvedReferences
@@ -33,18 +37,18 @@ class CppArray(CppLanguageElement):
     Methods simply returning string representation of the element start from '_'
     """
 
-    PROPERTIES = CppLanguageElement.PROPERTIES | \
-        {
-            "type",
-            "is_static",
-            "is_const",
-            "is_class_member",
-            "array_size",
-            "newline_align",
-            "items",
-        }
+    PROPERTIES = CppLanguageElement.PROPERTIES | {
+        "type",
+        "is_static",
+        "is_const",
+        "is_class_member",
+        "array_size",
+        "newline_align",
+        "items",
+    }
 
     def __init__(self, **properties):
+        super().__init__()
         self.type = None
         self.is_static = False
         self.is_const = False
@@ -113,15 +117,19 @@ class CppArray(CppLanguageElement):
         """
         self._sanity_check()
         if self.is_class_member and not (self.is_static and self.is_const):
-            raise RuntimeError("For class member variables use definition() and declaration() methods")
+            raise RuntimeError(
+                "For class member variables use definition() and declaration() methods"
+            )
 
         # newline-formatting of array elements makes sense only if array is not empty
         if self.newline_align and self.items:
-            with cpp.block(f'{self.decl_to_string()} =', endline=False, postfix=";") as block:
+            with cpp.block(
+                f"{self.decl_to_string()} =", endline=False, postfix=";"
+            ) as block:
                 # render array items
                 self._render_value(block)
         else:
-            cpp(f'{self.decl_to_string()} = {{{self._content()}}};')
+            cpp(f"{self.decl_to_string()} = {{{self._content()}}};")
 
     def render_to_string_declaration(self, cpp):
         """
@@ -133,8 +141,10 @@ class CppArray(CppLanguageElement):
         """
         self._sanity_check()
         if not self.is_class_member:
-            raise RuntimeError("For automatic variable use its render_to_string() method")
-        cpp(f'{self.decl_to_string()};')
+            raise RuntimeError(
+                "For automatic variable use its render_to_string() method"
+            )
+        cpp(f"{self.decl_to_string()};")
 
     def render_to_string_implementation(self, cpp):
         """
@@ -151,7 +161,9 @@ class CppArray(CppLanguageElement):
         """
         self._sanity_check()
         if not self.is_class_member:
-            raise RuntimeError("For automatic variable use its render_to_string() method")
+            raise RuntimeError(
+                "For automatic variable use its render_to_string() method"
+            )
 
         # generate definition for the static class member arrays only
         # other types are not supported
@@ -160,11 +172,13 @@ class CppArray(CppLanguageElement):
 
         # newline-formatting of array elements makes sense only if array is not empty
         if self.newline_align and self.items:
-            with cpp.block(f'{self.full_decl_to_string()} =', endline=False, postfix=';') as block:
+            with cpp.block(
+                f"{self.full_decl_to_string()} =", endline=False, postfix=";"
+            ) as block:
                 # render array items
                 self._render_value(block)
         else:
-            cpp(f'{self.full_decl_to_string()} = {{{self._content()}}};')
+            cpp(f"{self.full_decl_to_string()} = {{{self._content()}}};")
 
     def _sanity_check(self):
         """
@@ -192,11 +206,9 @@ class CppArray(CppLanguageElement):
     def _modifiers(self):
         modifiers = [
             self._static(),
-            self._const()
+            self._const(),
         ]
-        # leave only non-empty elements
-        modifiers = [mod for mod in modifiers if mod]
-        return " ".join(modifiers)
+        return " ".join(m for m in modifiers if m)
 
     def _size(self):
         """
@@ -217,5 +229,5 @@ class CppArray(CppLanguageElement):
         if not self.items:
             raise RuntimeError("Empty arrays do not supported")
         for item in self.items[:-1]:
-            cpp("{0},".format(item))
-        cpp("{0}".format(self.items[-1]))
+            cpp(f"{item},")
+        cpp(f"{self.items[-1]}")

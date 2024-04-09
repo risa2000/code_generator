@@ -30,15 +30,15 @@ class CppEnum(CppLanguageElement):
     Methods simply returning string representation of the element start from '_'
     """
 
-    PROPERTIES = CppLanguageElement.PROPERTIES | \
-        {
-            "prefix",
-            "is_enum_class",
-            "add_counter",
-            "enum_items",
-        }
+    PROPERTIES = CppLanguageElement.PROPERTIES | {
+        "prefix",
+        "is_enum_class",
+        "add_counter",
+        "enum_items",
+    }
 
     def __init__(self, **properties):
+        super().__init__()
         self.prefix = None
         self.enum_class = False
         self.add_counter = True
@@ -77,7 +77,9 @@ class CppEnum(CppLanguageElement):
         """
         counter = 0
         final_prefix = self.prefix if self.prefix is not None else "e"
-        with cpp.block(self.short_header_declaration_to_string(), endline=False, postfix=";") as block:
+        with cpp.block(
+            self.short_header_declaration_to_string(), endline=False, postfix=";"
+        ) as block:
             for item in self.enum_items:
                 block(f"{final_prefix}{item} = {counter},")
                 counter += 1

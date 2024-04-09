@@ -1,6 +1,11 @@
-from code_generation.cpp.language_element import CppLanguageElement, CppDeclaration, CppImplementation
-from code_generation.cpp.function_generator import CppFunction
 from textwrap import dedent
+
+from code_generation.cpp.language_element import (
+    CppLanguageElement,
+    CppDeclaration,
+    CppImplementation,
+)
+from code_generation.cpp.function_generator import CppFunction
 
 
 class CppClass(CppLanguageElement):
@@ -44,12 +49,11 @@ class CppClass(CppLanguageElement):
     }
     """
 
-    PROPERTIES = CppLanguageElement.PROPERTIES | \
-        {
-            "is_struct",
-            "documentation",
-            "parent_class",
-        }
+    PROPERTIES = CppLanguageElement.PROPERTIES | {
+        "is_struct",
+        "documentation",
+        "parent_class",
+    }
 
     class CppMethod(CppFunction):
         """
@@ -79,25 +83,25 @@ class CppClass(CppLanguageElement):
         }
         """
 
-        PROPERTIES = CppFunction.PROPERTIES | \
-            {
-                "ret_type",
-                "is_static",
-                "is_constexpr",
-                "is_virtual",
-                "is_inline",
-                "is_pure_virtual",
-                "is_const",
-                "is_override",
-                "is_final",
-                "arguments",
-                "implementation",
-                "documentation",
-            }
+        PROPERTIES = CppFunction.PROPERTIES | {
+            "ret_type",
+            "is_static",
+            "is_constexpr",
+            "is_virtual",
+            "is_inline",
+            "is_pure_virtual",
+            "is_const",
+            "is_override",
+            "is_final",
+            "arguments",
+            "implementation",
+            "documentation",
+        }
 
         def __init__(self, **properties):
             # arguments are plain strings
             # e.g. 'int* a', 'const string& s', 'size_t sz = 10'
+            super().__init__()
             self.ret_type = None
             self.is_static = False
             self.is_constexpr = False
@@ -144,7 +148,7 @@ class CppClass(CppLanguageElement):
             for definition rendering using render_to_string(cpp) interface
             """
             return CppImplementation(self)
-        
+
         def short_header_declaration_to_string(self):
             header = [
                 f"{self._static()}",
@@ -155,7 +159,7 @@ class CppClass(CppLanguageElement):
                 f"{self._pure()}",
             ]
             return " ".join(h for h in header if h)
-        
+
         def full_header_implementation_to_string(self):
             header = [
                 f"{self._ret_type()}",
@@ -197,7 +201,7 @@ class CppClass(CppLanguageElement):
                     cpp(dedent(self.documentation))
                 self.render_to_string(cpp)
             else:
-                cpp(f'{self.short_header_declaration_to_string()};')
+                cpp(f"{self.short_header_declaration_to_string()};")
 
         def render_to_string_implementation(self, cpp):
             """
@@ -214,10 +218,14 @@ class CppClass(CppLanguageElement):
             self._sanity_check()
 
             if self.implementation is None:
-                raise RuntimeError(f"No implementation handle for the method {self.name}")
+                raise RuntimeError(
+                    f"No implementation handle for the method {self.name}"
+                )
 
             if self.is_pure_virtual:
-                raise RuntimeError(f"Pure virtual method {self.name} could not be implemented")
+                raise RuntimeError(
+                    f"Pure virtual method {self.name} could not be implemented"
+                )
 
             if self.documentation and not self.is_constexpr:
                 cpp(dedent(self.documentation))
@@ -247,13 +255,21 @@ class CppClass(CppLanguageElement):
             if self.is_static and self.is_virtual:
                 raise ValueError(f"Static method {self.name} could not be virtual")
             if self.is_pure_virtual and not self.is_virtual:
-                raise ValueError(f"Pure virtual method {self.name} is also a virtual method")
+                raise ValueError(
+                    f"Pure virtual method {self.name} is also a virtual method"
+                )
             if not self.ref_to_parent:
-                raise ValueError(f"Method {self.name} object must be a child of CppClass")
+                raise ValueError(
+                    f"Method {self.name} object must be a child of CppClass"
+                )
             if self.is_constexpr and self.implementation is None:
-                raise ValueError(f'Method {self.name} object must be initialized when "constexpr"')
+                raise ValueError(
+                    f'Method {self.name} object must be initialized when "constexpr"'
+                )
             if self.is_pure_virtual and self.implementation is not None:
-                raise ValueError(f"Pure virtual method {self.name} could not be implemented")
+                raise ValueError(
+                    f"Pure virtual method {self.name} could not be implemented"
+                )
 
         def _modifiers_front(self):
             modifiers = [
@@ -261,17 +277,15 @@ class CppClass(CppLanguageElement):
                 self._virtual(),
                 self._inline(),
             ]
-            modifiers = [mod for mod in modifiers if mod]
-            return " ".join(modifiers)
+            return " ".join(m for m in modifiers if m)
 
         def _modifiers_back(self):
             modifiers = [
                 self._const(),
                 self._override(),
-                self._final()
+                self._final(),
             ]
-            modifiers = [mod for mod in modifiers if mod]
-            return " ".join(modifiers)
+            return " ".join(m for m in modifiers if m)
 
         def _static(self):
             """
@@ -336,6 +350,7 @@ class CppClass(CppLanguageElement):
             return "final" if self.is_final else ""
 
     def __init__(self, **properties):
+        super().__init__()
         self.is_struct = False
         self.documentation = None
         self.parent_class = None
@@ -476,9 +491,7 @@ class CppClass(CppLanguageElement):
         """
         # generate definition for static variables
         static_vars = [
-            variable
-            for variable in self.variable_members
-            if variable.is_static
+            variable for variable in self.variable_members if variable.is_static
         ]
 
         for var_item in static_vars:

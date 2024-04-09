@@ -7,13 +7,13 @@ def normalize_code(code):
     """
 
     replacements = OrderedDict()
-    replacements['\r\n'] = '\n'
-    replacements['\r\n\r\n'] = '\n'
-    replacements['\r\r'] = '\n'
-    replacements['\t\n'] = '\n'
-    replacements['\n\n'] = '\n'
-    replacements['\t'] = '    '
-    replacements['\r'] = '\n'
+    replacements["\r\n"] = "\n"
+    replacements["\r\n\r\n"] = "\n"
+    replacements["\r\r"] = "\n"
+    replacements["\t\n"] = "\n"
+    replacements["\n\n"] = "\n"
+    replacements["\t"] = "    "
+    replacements["\r"] = "\n"
 
     count = 1
     while count > 0:
@@ -42,7 +42,7 @@ def normalize_lines(text):
     """
     lines = text.splitlines()
     normalized_lines = [line.strip() for line in lines]
-    return '\n'.join(normalized_lines)
+    return "\n".join(normalized_lines)
 
 
 def is_debug():

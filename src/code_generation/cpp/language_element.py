@@ -1,6 +1,6 @@
 __doc__ = """The module encapsulates C++ code generation logics for main C++ language primitives:
 classes, methods and functions, variables, enums.
-Every C++ element could render its current state to a string that could be evaluated as 
+Every C++ element could render its current state to a string that could be evaluated as
 a legal C++ construction.
 
 Some elements could be rendered to a pair of representations (i.e. declaration and definition)
@@ -47,7 +47,7 @@ For more detailed information see SourceFile and CppSourceFile documentation.
 
 ###########################################################################
 # Declaration/Implementation helpers
-class CppDeclaration(object):
+class CppDeclaration:
     """
     declaration/Implementation pair is used to split one element code generation to
     declaration and implementation parts
@@ -71,7 +71,7 @@ class CppDeclaration(object):
         self.cpp_element.render_to_string_declaration(cpp)
 
 
-class CppImplementation(object):
+class CppImplementation:
     """
     See declaration description
     """
@@ -83,7 +83,7 @@ class CppImplementation(object):
         self.cpp_element.render_to_string_implementation(cpp)
 
 
-class CppLanguageElement(object):
+class CppLanguageElement:
     """
     The base class for all C++ language elements.
     Contains dynamic storage for element properties
@@ -92,7 +92,7 @@ class CppLanguageElement(object):
 
     PROPERTIES = {
         "name",
-        "ref_to_parent"
+        "ref_to_parent",
     }
 
     def __init__(self):
@@ -105,12 +105,12 @@ class CppLanguageElement(object):
 
     def normalize_properties(self, properties):
         """Produce properties with normalized names, i.e. substitute "const" with "is_const"."""
-        result = dict()
+        result = {}
         for name, val in properties.items():
             if name in self.PROPERTIES:
                 result[name] = val
-            if f'is_{name}' in self.PROPERTIES:
-                result[f'is_{name}'] = val
+            if f"is_{name}" in self.PROPERTIES:
+                result[f"is_{name}"] = val
         return result
 
     def init_properties(self, input_properties_dict, default_property_value=None):
@@ -122,7 +122,11 @@ class CppLanguageElement(object):
         (None by default, because of same as False semantic)
         """
         # Set all properties not listed in PROPERTIES to default_property_value
-        defaults = dict([(name, default_property_value) for name in self.PROPERTIES if not hasattr(self, name)])
+        defaults = {
+            name: default_property_value
+            for name in self.PROPERTIES
+            if not hasattr(self, name)
+        }
         defaults.update(self.normalize_properties(input_properties_dict))
         for name, val in defaults.items():
             setattr(self, name, val)

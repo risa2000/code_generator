@@ -21,13 +21,15 @@ class TestCppEnumStringIo(unittest.TestCase):
         enum = CppEnum(name="Items")
         enum.add_items(["Chair", "Table", "Shelve"])
         enum.render_to_string(cpp)
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             enum Items {
                 eChair = 0,
                 eTable = 1,
                 eShelve = 2,
                 eItemsCount = 3
-            };""")
+            };"""
+        )
         actual_output = writer.getvalue().strip()
         expected_output_normalized = normalize_code(expected_output)
         actual_output_normalized = normalize_code(actual_output)
@@ -42,13 +44,15 @@ class TestCppEnumStringIo(unittest.TestCase):
         enum = CppEnum(name="Items", prefix="Prefix")
         enum.add_items(["A", "B", "C"])
         enum.render_to_string(cpp)
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             enum Items {
                 PrefixA = 0,
                 PrefixB = 1,
                 PrefixC = 2,
                 PrefixItemsCount = 3
-            };""")
+            };"""
+        )
         actual_output = writer.getvalue().strip()
         expected_output_normalized = normalize_code(expected_output)
         actual_output_normalized = normalize_code(actual_output)
@@ -63,13 +67,15 @@ class TestCppEnumStringIo(unittest.TestCase):
         enum = CppEnum(name="Items", enum_class=True)
         enum.add_items(["A", "B", "C"])
         enum.render_to_string(cpp)
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             enum class Items {
                 eA = 0,
                 eB = 1,
                 eC = 2,
                 eItemsCount = 3
-            };""")
+            };"""
+        )
         actual_output = writer.getvalue().strip()
         expected_output_normalized = normalize_code(expected_output)
         actual_output_normalized = normalize_code(actual_output)

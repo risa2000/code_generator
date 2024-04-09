@@ -16,7 +16,7 @@ class CppSourceFile(SourceFile):
         """
         Create C++ source file
         """
-        formatter = formatter is None and self.default_formatter or formatter
+        formatter = self.default_formatter if formatter is None else formatter
         SourceFile.__init__(self, filename, formatter=formatter, writer=writer)
 
     def label(self, text):
@@ -25,4 +25,4 @@ class CppSourceFile(SourceFile):
         private:
         a:
         """
-        self.write('f{text}:')
+        self.write(f"{text}:")

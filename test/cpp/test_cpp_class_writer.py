@@ -27,25 +27,18 @@ class TestCppClassStringIo(unittest.TestCase):
         # Add a CppVariable to the class
         cpp_class.add_variable(
             CppVariable(
-                name="m_var",
-                type="size_t",
-                is_static=True,
-                is_const=True,
-                value="255"
+                name="m_var", type="size_t", is_static=True, is_const=True, value="255"
             )
         )
 
         # Define a function body for the CppMethod
         def body(cpp):
-            cpp('return m_var;')
+            cpp("return m_var;")
 
         # Add a CppMethod to the class
         cpp_class.add_method(
             CppClass.CppMethod(
-                name="GetVar",
-                ret_type="size_t",
-                is_static=True,
-                implementation=body
+                name="GetVar", ret_type="size_t", is_static=True, implementation=body
             )
         )
 
@@ -53,19 +46,21 @@ class TestCppClassStringIo(unittest.TestCase):
         cpp_class.render_to_string(cpp_file)
 
         # Define the expected output
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             struct MyClass
             {
                 static size_t GetVar();
                 static const size_t m_var;
             };
-            
+
             static const size_t MyClass::m_var = 255;
-            
+
             size_t MyClass::GetVar()
             {
                 return m_var;
-            }""")
+            }"""
+        )
 
         # Assert the output matches the expected output
         actual_output = writer.getvalue().strip()
@@ -88,11 +83,7 @@ class TestCppClassStringIo(unittest.TestCase):
         # Add a CppVariable to the parent class
         parent_class.add_variable(
             CppVariable(
-                name="m_var",
-                type="int",
-                is_static=True,
-                is_const=True,
-                value="42"
+                name="m_var", type="int", is_static=True, is_const=True, value="42"
             )
         )
 
@@ -102,7 +93,7 @@ class TestCppClassStringIo(unittest.TestCase):
                 name="GetVar",
                 ret_type="int",
                 is_static=True,
-                implementation=lambda cpp_file: cpp_file("return m_var;")
+                implementation=lambda cpp_file: cpp_file("return m_var;"),
             )
         )
 
@@ -113,25 +104,27 @@ class TestCppClassStringIo(unittest.TestCase):
         child_class.render_to_string(cpp)
 
         # Define the expected output
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             class ParentClass
             {
             public:
                 static int GetVar();
                 static const int m_var;
             };
-            
+
             static const int ParentClass::m_var = 42;
-            
+
             int ParentClass::GetVar()
             {
                 return m_var;
             }
-            
+
             class ChildClass : public ParentClass
             {
             public:
-            };""")
+            };"""
+        )
 
         # Assert the output matches the expected output
         actual_output = writer.getvalue().strip()
@@ -159,7 +152,8 @@ class TestCppClassStringIo(unittest.TestCase):
         cpp_class.render_to_string(cpp)
 
         # Define the expected output
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             class MyClass
             {
             public:
@@ -167,8 +161,9 @@ class TestCppClassStringIo(unittest.TestCase):
                 {
                 public:
                 };
-                
-            };""")
+
+            };"""
+        )
 
         actual_output = writer.getvalue().strip()
         expected_output_normalized = normalize_code(expected_output)
@@ -197,7 +192,8 @@ class TestCppClassStringIo(unittest.TestCase):
         cpp_class.render_to_string(cpp)
 
         # Define the expected output
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             class MyClass
             {
             public:
@@ -207,7 +203,8 @@ class TestCppClassStringIo(unittest.TestCase):
                     eItem3 = 2,
                     eItemsCount = 3
                 };
-            };""")
+            };"""
+        )
 
         # Assert the output matches the expected output
         actual_output = writer.getvalue().strip()
@@ -235,13 +232,15 @@ class TestCppClassStringIo(unittest.TestCase):
         cpp_class.render_to_string(cpp)
 
         # Define the expected output
-        expected_output = dedent("""\
+        expected_output = dedent(
+            """\
             class MyClass
             {
             public:
                 static const char* Array[];
             };
-            static const char* MyClass::Array[] = {Item1, Item2, Item3};""")
+            static const char* MyClass::Array[] = {Item1, Item2, Item3};"""
+        )
 
         # Assert the output matches the expected output
         actual_output = writer.getvalue().strip()

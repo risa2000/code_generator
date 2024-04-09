@@ -13,6 +13,7 @@ class CodeLayout:
     """
     Class defining code layout rules, such as indentation, line ending, etc.
     """
+
     default_endline = "\n"
     default_indent = " " * 4
     default_postfix = ""
@@ -32,6 +33,7 @@ class CodeFormatter:
     """
     Base class for code close of different styles
     """
+
     pass
 
 
@@ -46,7 +48,15 @@ class ANSICodeFormatter(CodeFormatter):
     finishing postfix is optional (e.g. necessary for classes, unnecessary for namespaces)
     """
 
-    def __init__(self, writer, text = None, indent = None, endline = True, postfix = None, code_layout=None):
+    def __init__(
+        self,
+        writer,
+        text=None,
+        indent=None,
+        endline=True,
+        postfix=None,
+        code_layout=None,
+    ):
         """
         @param: owner - SourceFile where text is written to
         @param: text - text opening C++ close
@@ -56,7 +66,7 @@ class ANSICodeFormatter(CodeFormatter):
         self.code_layout = code_layout or CodeLayout()
         self.indent_level = 0 if indent is None else indent
         if isinstance(text, (list, tuple)):
-            self.text = ''.join(text)
+            self.text = "".join(text)
         else:
             self.text = text
         self.endline = endline
@@ -71,8 +81,8 @@ class ANSICodeFormatter(CodeFormatter):
             self.line(self.text, endline=self.endline)
             self.line("{")
         else:
-            text = self.text and f'{self.text} ' or ''
-            self.line(f'{text}{{')
+            text = self.text and f"{self.text} " or ""
+            self.line(f"{text}{{")
         self.indent_level += 1
         return self
 
@@ -84,7 +94,7 @@ class ANSICodeFormatter(CodeFormatter):
     def line(self, text, indent=None, endline=True):
         """Write one line into writer."""
         if indent is None:
-            indent =  self.indent_level
+            indent = self.indent_level
         self.writer.write(
             f"{self.code_layout.indent * indent}"
             f"{text}"
@@ -92,7 +102,14 @@ class ANSICodeFormatter(CodeFormatter):
         )
 
     def block(self, text, endline=True, postfix=None):
-        return ANSICodeFormatter(writer=self.writer, text=text, indent=self.indent_level, endline=endline, postfix=postfix, code_layout=self.code_layout)
+        return ANSICodeFormatter(
+            writer=self.writer,
+            text=text,
+            indent=self.indent_level,
+            endline=endline,
+            postfix=postfix,
+            code_layout=self.code_layout,
+        )
 
     def label(self, text):
         """Write C/C++ code label."""
@@ -103,7 +120,7 @@ class ANSICodeFormatter(CodeFormatter):
         Insert one or several empty lines
         """
         for _ in range(n):
-            self.line(text='', indent=0)
+            self.line(text="", indent=0)
 
 
 class CodeFormatterFactory:
@@ -119,9 +136,8 @@ class CodeFormatterFactory:
         """
         code_layout = code_layout is not None and code_layout or CodeLayout()
         if code_format == CodeFormat.ANSI_CPP:
-            return type('Formatter', (ANSICodeFormatter,), {'code_layout': code_layout})
-        elif code_format == CodeFormat.DEFAULT:
+            return type("Formatter", (ANSICodeFormatter,), {"code_layout": code_layout})
+        if code_format == CodeFormat.DEFAULT:
             # TODO: leave default formatter for respective source file
-            return type('Formatter', (CodeFormatter,), {'code_layout': CodeLayout})
-        else:
-            raise ValueError(f"Unknown code format: {code_format}")
+            return type("Formatter", (CodeFormatter,), {"code_layout": CodeLayout})
+        raise ValueError(f"Unknown code format: {code_format}")

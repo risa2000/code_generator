@@ -1,5 +1,10 @@
-from code_generation.cpp.language_element import CppLanguageElement, CppDeclaration, CppImplementation
 from textwrap import dedent
+
+from code_generation.cpp.language_element import (
+    CppLanguageElement,
+    CppDeclaration,
+    CppImplementation,
+)
 
 
 class CppFunction(CppLanguageElement):
@@ -27,18 +32,18 @@ class CppFunction(CppLanguageElement):
     }
     """
 
-    PROPERTIES = CppLanguageElement.PROPERTIES | \
-        {
-            "ret_type",
-            "is_constexpr",
-            "arguments",
-            "implementation",
-            "documentation",
-        }
+    PROPERTIES = CppLanguageElement.PROPERTIES | {
+        "ret_type",
+        "is_constexpr",
+        "arguments",
+        "implementation",
+        "documentation",
+    }
 
     def __init__(self, **properties):
         # arguments are plain strings
         # e.g. 'int* a', 'const string& s', 'size_t sz = 10'
+        super().__init__()
         self.ret_type = None
         self.is_constexpr = False
         self.arguments = []
@@ -67,7 +72,7 @@ class CppFunction(CppLanguageElement):
             f"{self.name}({self.args()})",
         ]
         return " ".join(h for h in header if h)
-        
+
     def args(self):
         """
         @return: string arguments
@@ -102,12 +107,14 @@ class CppFunction(CppLanguageElement):
         return CppImplementation(self)
 
     def render_to_string(self, cpp):
-        """Function is rendered as with implementation """
+        """Function is rendered as with implementation"""
         # check all properties for the consistency
         self._sanity_check()
         if self.documentation:
             cpp(dedent(self.documentation))
-        with cpp.block(self.short_header_declaration_to_string(), endline=False) as block:
+        with cpp.block(
+            self.short_header_declaration_to_string(), endline=False
+        ) as block:
             self.body(block)
 
     def render_to_string_declaration(self, cpp):
@@ -123,7 +130,7 @@ class CppFunction(CppLanguageElement):
                 cpp(dedent(self.documentation))
             self.render_to_string(cpp)
         else:
-            cpp(f'{self.short_header_declaration_to_string()};')
+            cpp(f"{self.short_header_declaration_to_string()};")
 
     def render_to_string_implementation(self, cpp):
         if not self.is_constexpr:

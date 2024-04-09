@@ -8,7 +8,7 @@ int my_array[5] = {1, 2, 0};
 
 """
 
-cpp = CppSourceFile('array.cpp')
+cpp = CppSourceFile("array.cpp")
 
 arr = CppArray(name="my_array", type="int", array_size=5)
 arr.add_array_items(["1", "2", "0"])

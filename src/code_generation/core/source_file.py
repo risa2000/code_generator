@@ -1,20 +1,20 @@
 from code_generation.core.code_formatter import CodeFormat, CodeFormatterFactory
 
 __doc__ = """
-Simple and straightforward code generator that could be used for generating code 
+Simple and straightforward code generator that could be used for generating code
 on any programming language and to be a 'building block' for creating more complicated
 code generators.
- 
+
 Examples of usage:
 
 1.
 # Python code
 cpp = SourceFile('example.cpp')
 cpp('int i = 0;')
- 
+
 // Generated C++ code
 int i = 0;
- 
+
 2.
 # Python code
 cpp = CppSourceFile('example.cpp')
@@ -22,7 +22,7 @@ with cpp.block('class A', ';'):
     cpp.label('public')
     cpp('int m_classMember1;')
     cpp('double m_classMember2;')
- 
+
 // Generated C++ code
 class A
 {
@@ -111,7 +111,9 @@ class SourceFile:
         """
         if postfix is None:
             postfix = self.code_formatter.code_layout.postfix
-        return self.code_formatter(self.out, text=text, endline=endline, postfix=postfix)
+        return self.code_formatter(
+            self.out, text=text, endline=endline, postfix=postfix
+        )
 
     def newline(self, n=1):
         """
