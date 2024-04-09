@@ -153,7 +153,8 @@ class CppLanguageElement:
         parent = self.ref_to_parent
         # walk through all existing parents
         while parent:
-            full_parent_qualifier = f"{parent.name}::{full_parent_qualifier}"
+            if parent.name is not None:
+                full_parent_qualifier = f"{parent.name}::{full_parent_qualifier}"
             parent = parent.ref_to_parent
         return full_parent_qualifier
 
