@@ -6,17 +6,23 @@ import platform
 import pathlib
 import json
 from subprocess import run
-from configparser import ConfigParser
+import tomllib
 
-cfg = ConfigParser()
-cfg.read(filenames=['pyproject.toml'])
-VERSION = cfg.get('project', 'version')
+def read_project_toml(fpath):
+    with open(fpath, 'rb') as fcfg:
+        toml = tomllib.load(fcfg)
+        return toml
+    
+PYPROJECT_TOML = 'pyproject.toml'
+
+cfg = read_project_toml(PYPROJECT_TOML)
+VERSION = cfg['project']['version']
 
 # Home dir
 HOME = pathlib.Path.home()
 
 # Name with underscore (wheel filename)
-PACKAGE_NAME = cfg.get('project', 'name')
+PACKAGE_NAME = cfg['project']['name']
 
 # Name with dash (pip name, URL, S3 bucket)
 PACKAGE_NAME_DASH = PACKAGE_NAME.replace('_', '-')
@@ -230,20 +236,21 @@ def tmp_release_notes():
     return os.path.abspath(release_md)
 
 
-def increment_minor_version(file_path: str):
+def increment_patch_version(file_path: str):
     """
-    Increment minor package version number, e.g. 2.2.9 -> 2.2.10
+    Increment patch package version number, e.g. 2.2.9 -> 2.2.10
     :return: New version number
     """
-    config = ConfigParser()
-    config.read(file_path)
-    version = config['metadata']['version']
+    cfg = read_project_toml(file_path)
+    version = cfg['project']['version']
     major, minor, patch = [int(v) for v in version.split('.')]
     patch += 1
     new_version = f"{major}.{minor}.{patch}"
-    config['metadata']['version'] = new_version
+    cfg['project']['version'] = new_version
     with open(file_path, 'w') as f:
-        config.write(f)
+        pass
+        raise NotImplementedError
+        #cfg..config.write(f)
     return new_version
 
 
@@ -268,7 +275,7 @@ def main():
                         default=False,
                         required=False)
     parser.add_argument('--increment-version',
-                        help='Increment minor version number, e.g. 2.2.9 -> 2.2.10',
+                        help='Increment patch version number, e.g. 2.2.9 -> 2.2.10',
                         action='store_true',
                         default=False,
                         required=False)
@@ -281,7 +288,7 @@ def main():
     sanity_check(args)
 
     if args.increment_version:
-        new_version = increment_minor_version('setup.cfg')
+        new_version = increment_patch_version(PYPROJECT_TOML)
         VERSION = new_version
         print(f'Increment version to {new_version}')
 
