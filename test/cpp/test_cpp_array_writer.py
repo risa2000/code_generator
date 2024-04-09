@@ -1,9 +1,8 @@
 import unittest
 import io
-
 from textwrap import dedent
-from code_generation.cpp.source_file import CppSourceFile
-from code_generation.cpp.array_generator import CppArray
+
+from code_generation.cpp import CppSourceFile, CppArray
 from test.comparing_tools import normalize_lines
 
 __doc__ = """Unit tests for C++ code generator

@@ -1,4 +1,4 @@
-from code_generation.cpp.language_element import CppLanguageElement
+from .language_element import CppLanguageElement
 
 
 class CppEnum(CppLanguageElement):

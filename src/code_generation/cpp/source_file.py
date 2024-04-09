@@ -1,5 +1,4 @@
-from code_generation.core.code_formatter import CodeFormat
-from code_generation.core.source_file import SourceFile
+from ..core import CodeFormat, SourceFile
 
 __doc__ = """
 """

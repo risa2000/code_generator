@@ -1,2 +1,2 @@
-from . import source_file
-from . import code_formatter
+from .source_file import *
+from .code_formatter import *

@@ -1,5 +1,4 @@
-from code_generation.cpp.source_file import CppSourceFile
-from code_generation.cpp.function_generator import CppFunction
+from code_generation.cpp import CppSourceFile, CppFunction
 
 __doc__ = """Example of generating C++ function
 

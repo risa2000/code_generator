@@ -1,11 +1,7 @@
 from textwrap import dedent
 
-from code_generation.cpp.language_element import (
-    CppLanguageElement,
-    CppDeclaration,
-    CppImplementation,
-)
-from code_generation.cpp.function_generator import CppFunction
+from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from .function_generator import CppFunction
 
 
 class CppClass(CppLanguageElement):
