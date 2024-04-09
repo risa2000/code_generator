@@ -1,116 +1,104 @@
-# Pythonic Code Generator
+# Pythonic C/C++ Code Generator
 
-Simple and straightforward generator for algorithmic creating of program code. 
-In general, it could be used for generating code in any programming language,
-however, at the moment it offers specific implementations for C++, Java and HTML.
+Using a simple abstract Python interface allows generating source code for
+basic C/C++ constructs:
+* variables
+* enums
+* arrays
+* functions
+* classes (structs)
 
-Written in Python, used to work both with Python 2 and 3, however, 
-implementation for Python 2 is deprecated and has not been supported for a while.
-
-## Code Generation Usecases
-
-Programmatic source code generation can have a wide range of use cases, including:
-
-* Code generation for any repetitive tasks, such as generating getters and setters or creating CRUD operations
-* Object serialization: Generating code to serialize and deserialize objects
-* Language translations: Converting code from one programming language to another
-* Formatting reports: Generating custom report files, such as HTML/CSS
-* Database interactions: Generating code to interact with databases, such as generating SQL statements
-* API generation: Generating API endpoints, requests and responses, and documentation for web services
-* Mocking and testing: Generating code to create mock objects and test data
-* Prototyping: Generating code to quickly prototype and experiment with new ideas.
-* Integration with other systems: Generating code to integrate with other systems, such as web services or system RPC calls
-
-Overall, programmatic source code generation can help improve development efficiency, reduce human error, and automate repetitive tasks.
+**Note about the source:** This repository is a fork of a more featured project
+https://github.com/yuchdev/code_generator, which targets also *HTML* and *Java*
+generation. I am neither using nor knowing each one enough to keep their
+development on par with C/C++ code base, so I deliberately dropped both here.
 
 ## Installation
 
-`pip install code_generation`
-
-## Quick Start
-
-### C++
-
-TODO
-
-```python
-from code_generation import CppFile, CppFunction, CppVariable
+**Note about the installation:** Running `pip install code_generation` will install the original package from the source mentioned above. For installing this version you may need to run `pip` while referencing the local source tree.
+```shell
+pip install [options] [-e] <local project path> ...
 ```
 
-## C++
+## C/C++
 
-The project initially was created to generate C++ code, and it is still the most mature implementation.
-It is based on a bit of a different approach than other languages, because C++ language constructions
-(like C++ classes and functions) include declarations and definitions (implementations). 
-Declaration usually placed in header files (`*.h`), while definition is in source files (`*.cpp`).
+C/C++ generator tries to follow the classic declaration vs definition dichotomy
+in C/C++ and allows explicit targeting of one or the other.
 
-Every C++ element could render its current state to a string that could be evaluated as 
-a legal C++ construction, in two places: declaration and definition.
+### Creating variables
 
-### Usage examples
-
-#### Generate C++ code from Python code
-
-##### Creating variables
-
-###### Python code
+#### Python code
 ```python
-cpp = CodeFile('example.cpp')
+from code_generation.cpp import CppSourceFile, CppVariable
+
+cpp = CppSourceFile('example.cpp')
 cpp('int i = 0;')
 
-x_variable = CppVariable(name='x', type='int const&', is_static=True, is_constexpr=True, value='42')
+x_variable = CppVariable(name='x', type='int const&', static=True, constexpr=True, value='42')
 x_variable.render_to_string(cpp)
 
-name_variable = CppVariable(name='name', type='char*', is_extern=True)
+name_variable = CppVariable(name='name', type='char*', extern=True)
 name_variable.render_to_string(cpp)
+
+cpp.close())
 ```
 
-###### Generated C++ code
+#### Generated C++ code
 ```c++
 int i = 0;
 static constexpr int const& x = 42;
 extern char* name;
 ```
 
-##### Creating functions
+### Creating functions
 
-###### Python code
+#### Python code
 ```python
-def handle_to_factorial(self, cpp):
+from code_generation.cpp import CppSourceFile, CppFunction
+
+def handle_to_factorial(cpp):
     cpp('return n < 1 ? 1 : (n * factorial(n - 1));')
 
-cpp = CodeFile('example.cpp')
+cpp = CppSourceFile('example.cpp')
 
 factorial_function = CppFunction(name='factorial',
     ret_type='int',
     is_constexpr=True,
     implementation=handle_to_factorial,
     documentation='/// Calculates and returns the factorial of \p n.')
+
 factorial_function.add_argument('int n')
 factorial_function.render_to_string(cpp)
+
+cpp.close())
 ```
 
-###### Generated C++ code
+#### Generated C++ code
 ```c++
 /// Calculates and returns the factorial of \p n.
-constexpr int factorial(int n)
-{
-    return n <= 1 ? 1 : (n * factorial(n - 1));
+constexpr int factorial(int n) {
+    return n < 1 ? 1 : (n * factorial(n - 1));
 }
+
 ```
 
-##### Creating classes and structures
+### Creating classes and structures
 
-###### Python code
+#### Python code
 ```python
-cpp = CppFile('example.cpp')
-with cpp.block('class A', ';'):
-    cpp.label('public:')
-    cpp('int m_classMember1;')
-    cpp('double m_classMember2;')
+from code_generation.cpp import CppSourceFile
+
+cpp = CppSourceFile('example.cpp')
+
+with cpp.block('class A', postfix=';') as block:
+    block.label('public')
+    block('int m_classMember1;')
+    block('double m_classMember2;')
+
+cpp.close()
 ```
 
-###### Generated C++ code
+#### Generated C++ code
 ```c++
 class A
 {
@@ -120,62 +108,67 @@ public:
 };
 ```
 
-##### Rendering `CppClass` objects to C++ declaration and implementation
+### Rendering `CppClass` objects to C++ declaration and implementation
 
-###### Python code
+#### Python code
 
 ```python
-cpp_class = CppClass(name = 'MyClass', is_struct = True)
+from code_generation.cpp import CppSourceFile, CppClass, CppVariable
+
+cpp = CppSourceFile('example.cpp')
+header = CppSourceFile('example.h')
+
+cpp_class = CppClass(name = 'MyClass', struct = True)
 cpp_class.add_variable(CppVariable(name = "m_var",
     type = 'size_t',
-    is_static = True,
-    is_const = True,
+    static = True,
+    const = True,
     value = 255))
+
+cpp_class.render_to_string_declaration(header)
+cpp_class.render_to_string_implementation(cpp)
+
+cpp.close()
+header.close())
 ```
  
-###### Generated C++ declaration
+#### Generated C++ declaration
 
 ```c++
 struct MyClass
 {
     static const size_t m_var;
-}
+};
 ```
  
-###### Generated C++ implementation
+#### Generated C++ implementation
 ```c++
-const size_t MyClass::m_var = 255;
+static const size_t MyClass::m_var = 255;
 ```
 
 ### Implementation Notes
 
-#### CppFile
+#### CppSourcešFile
 
-Module `core.code_generator` provides basic code generating and 
-formatting functionality, that could be used for generating code in any language.
+Module `code_generation.cpp` provides the tools for C/C++ code generating and
+formatting functionality.
  
-The main object referenced from `code_generator` is `CppFile`, 
-which is passed as a parameter to `render_to_string(cpp)` Python method
+The Python code typically starts with `CppSourceFile` instance (`cpp`), which
+is passed around as a target for different language objects, by calling
+`render_to_string(cpp)` Python method.
 
-It could also be used for composing more complicated C++ code,
-that may be not supported by `cpp.*` classes.
+`CppSourceFile` instance `cpp` can be also used for composing an arbitrary C++
+code using following semantics:
 
-It supports:
-
-- functional calls:
+- functional call:
 ```python
 cpp('int a = 10;')
 ```
  
-- `with` semantic:
+- context manager `with` semantic:
 ```python
-with cpp.block('class MyClass', ';')
-    class_definition(cpp)
-```
- 
-- append code to the last string without EOL:
-```python
-cpp.append(', p = NULL);')
+with cpp.block('class MyClass', ';') as block
+    class_definition(block)
 ```
  
 - empty lines:
@@ -183,47 +176,23 @@ cpp.append(', p = NULL);')
 cpp.newline(2)
 ```
 
-#### ANSICodeStyle
+#### ANSICodeFormatter
 
-Class `ANSICodeStyle` is responsible for code formatting.
-Re-implement it if you wish to apply any other formatting style.
+Class `ANSICodeFormatter` together with `CodeLayout` is responsible for code
+formatting and can be reimplemented to customize the formatting style.
  
-
-## Java
-
-TODO
-
-## HTML
-
-HTML code generation is implemented in `html.*` modules.
-It was added to the project mostly to generate HTML reports.
-
 ## Maintenance
 
 ### Executing unit tests
 The following command will execute the unit tests.
 
 ```bash
-python -m unittest tests/test_cpp_file.py
-python -m unittest tests/test_cpp_function_writer.py
-python -m unittest tests/test_cpp_variable_writer.py
-python -m unittest tests/test_html_writer.py
+python ./run_tests.py
 ```
 
-### Updating unit tests assets
-After changing reference data for the unit test the test assets needs to be updated to successfully pass the unit tests.
-
-```bash
-python create_assets.py --assets test_assets
-```
-
-After executing that command, the fixed data under `tests/test_assets` will be updated and will need to be committed to git.
- 
 ### Acknowledgements
 
-Thanks to Eric Reynolds, the idea based on his 
-[article](https://www.codeproject.com/Articles/571645/Really-simple-Cplusplus-code-generation-in-Python) 
-published on Code Project.
-
-Used under the [Code Project Open License](https://www.codeproject.com/info/cpol10.aspx)
-
+This is a fork of the broader project
+https://github.com/yuchdev/code_generator, which has been reduced to only
+support C/C++ (for simplicity and the fact that I do not use and know both HTML
+and Java enough to maintain their respective implementation).
