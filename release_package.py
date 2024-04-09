@@ -9,14 +9,14 @@ from subprocess import run
 from configparser import ConfigParser
 
 cfg = ConfigParser()
-cfg.read(filenames=['setup.cfg'])
-VERSION = cfg.get('metadata', 'version')
+cfg.read(filenames=['pyproject.toml'])
+VERSION = cfg.get('project', 'version')
 
 # Home dir
 HOME = pathlib.Path.home()
 
 # Name with underscore (wheel filename)
-PACKAGE_NAME = cfg.get('metadata', 'name')
+PACKAGE_NAME = cfg.get('project', 'name')
 
 # Name with dash (pip name, URL, S3 bucket)
 PACKAGE_NAME_DASH = PACKAGE_NAME.replace('_', '-')

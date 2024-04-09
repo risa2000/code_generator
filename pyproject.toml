@@ -1,6 +1,49 @@
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "cpp_code_gen"
+requires-python = ">= 3.8"
+version = "0.9.1"
+
+authors = [
+    { name = "Richard Musil", email = "risa2000x@gmail.com" },
+    { name = "Yurii Cherkasov", email = "strategarius@protonmail.com" },
+]
+
+maintainers = [
+    { name = "Richard Musil", email = "risa2000x@gmail.com" },
+]
+
+description = "Simple C/C++ code generator"
+readme = "README.md"
+license = {text = "MIT License"}
+
+classifiers = [
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 3 - Alpha",
+
+  # Indicate who your project is intended for
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+
+  # Pick your license as you wish (see also "license" above)
+  "License :: OSI Approved :: MIT License",
+
+  # Specify the Python versions you support here.
+  "Programming Language :: Python :: 3",
+]
+
+keywords = ["Cpp", "Python", "codegen"]
+
+[project.urls]
+Homepage = "https://github.com/risa2000/cpp_code_gen"
+Repository = "https://github.com/risa2000/cpp_code_gen.git"
+Issues = "https://github.com/risa2000/cpp_code_gen/issues"
