@@ -1,11 +1,11 @@
 from textwrap import dedent
 
-from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from .language_element import CppDeclaration, CppImplementation
 from .function_generator import CppFunction
-from .scope_generator import CppScope
+from .scope_generator import CppClassScope
 
 
-class CppClass(CppScope):
+class CppClass(CppClassScope):
     """
     The Python class that generates string representation for C++ class or struct.
     Usually contains a number of child elements - internal classes, enums, methods and variables.
@@ -46,7 +46,7 @@ class CppClass(CppScope):
     }
     """
 
-    PROPERTIES = CppScope.PROPERTIES | {
+    PROPERTIES = CppClassScope.PROPERTIES | {
         "is_struct",
         "parent_class",
     }
@@ -359,12 +359,35 @@ class CppClass(CppScope):
             return f" : public {self._parent_class()}"
 
     # group generated sections
+    def anything_public_to_declare(self):
+        return any(
+            [
+                self.scoped_enums,
+                self.internal_class_elements,
+                self.methods,
+            ]
+        )
+
+    def anything_private_to_declare(self):
+        return any(
+            [
+                self.variable_members,
+                self.array_members,
+            ]
+        )
+
     def class_interface(self, cpp):
         """
         Generates section that generally used as an 'open interface'
         Generates string representation for enums, internal classes and methods
         Should be placed in 'public:' section
         """
+        if not self.anything_public_to_declare():
+            return
+
+        if not self.is_struct:
+            cpp.label("public")
+
         self.render_enum_declaration(cpp)
         self.render_internal_classes_declaration(cpp)
         self.render_methods_declaration(cpp)
@@ -374,6 +397,13 @@ class CppClass(CppScope):
         Generates section of class member variables.
         Should be placed in 'private:' section
         """
+        if not self.anything_private_to_declare():
+            return
+
+        # private is default class scope so be explict only when there was a public one before
+        if not self.is_struct and self.anything_public_to_declare():
+            cpp.label("private")
+
         self.render_variables_declaration(cpp)
         self.render_array_declaration(cpp)
 
@@ -400,11 +430,9 @@ class CppClass(CppScope):
 
         with cpp.block(render_str, postfix=";") as block:
             # in case of struct all members meant to be public
-            if not self.is_struct:
-                block.label("public")
             self.class_interface(block)
             self.private_class_members(block)
-        cpp.newline()
+            self.render_internal_scopes_declarations(block)
 
     def render_to_string_implementation(self, cpp):
         """
@@ -414,6 +442,7 @@ class CppClass(CppScope):
         self.render_static_members_implementation(cpp)
         self.render_methods_implementation(cpp)
         self.render_internal_classes_implementation(cpp)
+        self.render_internal_scopes_implementation(cpp)
 
     ########################################
     # PRIVATE METHODS

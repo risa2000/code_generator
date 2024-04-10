@@ -3,18 +3,20 @@ from textwrap import dedent
 from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
 
 
-class CppScope(CppLanguageElement):
+class CppClassScope(CppLanguageElement):
     """
     An abstract scope which can accommodated different language elements and can be used to define different sections of class or struct.
     """
 
     PROPERTIES = CppLanguageElement.PROPERTIES | {
         "documentation",
+        "scope",
     }
 
     def __init__(self, **properties):
         super().__init__()
         self.documentation = None
+        self.scope = None
         self.init_properties(properties)
 
         # aggregated classes
@@ -31,6 +33,9 @@ class CppScope(CppLanguageElement):
 
         # class scoped enums
         self.scoped_enums = []
+
+        # internal scopes
+        self.internal_scopes = []
 
     # add class members
     def add_enum(self, enum):
@@ -72,7 +77,35 @@ class CppScope(CppLanguageElement):
         method.is_method = True
         self.methods.append(method)
 
-    # render class members
+    def add_internal_scope(self, cpp_scope):
+        """
+        Add nested scope
+        @param: cpp_scope CppScope instance
+        """
+        cpp_scope.ref_to_parent = self
+        self.internal_scopes.append(cpp_scope)
+
+    # render declaration
+    def anything_to_declare_local(self):
+        """
+        Checks if there is any local element (without nested scopes) which should be declared.
+        """
+        return any(
+            [
+                self.internal_class_elements,
+                self.scoped_enums,
+                self.variable_members,
+                self.array_members,
+                self.methods,
+            ]
+        )
+
+    def anything_to_declare(self):
+        """
+        Checks if there is any element which should be declared.
+        """
+        return self.internal_scopes or self.anything_to_declare_local()
+
     def render_internal_classes_declaration(self, cpp):
         """
         Generates section of nested classes
@@ -115,6 +148,34 @@ class CppScope(CppLanguageElement):
         for func_item in self.methods:
             func_item.render_to_string_declaration(cpp)
 
+    def render_internal_scopes_declarations(self, cpp):
+        """
+        Generates sections of nested scopes (with labels if given)
+        """
+        for scope_item in self.internal_scopes:
+            scope_item.declaration().render_to_string(cpp)
+
+    def render_to_string_declaration(self, cpp):
+        """
+        Render to string scope declaration.
+        """
+        if not self.anything_to_declare():
+            return
+
+        if self.scope is not None:
+            cpp.label(self.scope)
+
+        if self.documentation:
+            cpp(dedent(self.documentation))
+
+        self.render_enum_declaration(cpp)
+        self.render_internal_classes_declaration(cpp)
+        self.render_methods_declaration(cpp)
+        self.render_variables_declaration(cpp)
+        self.render_array_declaration(cpp)
+        self.render_internal_scopes_declarations(cpp)
+
+    # render implementation
     def render_static_members_implementation(self, cpp):
         """
         Generates definition for all static class variables
@@ -128,11 +189,13 @@ class CppScope(CppLanguageElement):
 
         for var_item in static_vars:
             var_item.definition().render_to_string(cpp)
+
+        if self.array_members:
             cpp.newline()
 
         for arr_item in self.array_members:
             arr_item.definition().render_to_string(cpp)
-            cpp.newline()
+        cpp.newline()
 
     def render_methods_implementation(self, cpp):
         # generate methods implementation section
@@ -147,28 +210,11 @@ class CppScope(CppLanguageElement):
             class_item.render_to_string_implementation(cpp)
             cpp.newline()
 
-    def render_to_string(self, cpp):
-        """
-        Render to string both declaration and definition.
-        A rare case enough, because the only code generator handle is used.
-        Typically class declaration is rendered to *.h file, and definition to *.cpp
-        """
-        self.render_to_string_declaration(cpp)
-        self.render_to_string_implementation(cpp)
-
-    def render_to_string_declaration(self, cpp):
-        """
-        Render to string scope declaration.
-        """
-        if self.documentation:
-            cpp(dedent(self.documentation))
-
-        self.render_enum_declaration(cpp)
-        self.render_internal_classes_declaration(cpp)
-        self.render_methods_declaration(cpp)
-        self.render_variables_declaration(cpp)
-        self.render_array_declaration(cpp)
-        cpp.newline()
+    def render_internal_scopes_implementation(self, cpp):
+        # do the same for nested classes
+        for scope_item in self.internal_scopes:
+            scope_item.render_to_string_implementation(cpp)
+            cpp.newline()
 
     def render_to_string_implementation(self, cpp):
         """
@@ -178,6 +224,16 @@ class CppScope(CppLanguageElement):
         self.render_static_members_implementation(cpp)
         self.render_methods_implementation(cpp)
         self.render_internal_classes_implementation(cpp)
+        self.render_internal_scopes_implementation(cpp)
+
+    def render_to_string(self, cpp):
+        """
+        Render to string both declaration and definition.
+        A rare case enough, because the only code generator handle is used.
+        Typically class declaration is rendered to *.h file, and definition to *.cpp
+        """
+        self.render_to_string_declaration(cpp)
+        self.render_to_string_implementation(cpp)
 
     def declaration(self):
         """

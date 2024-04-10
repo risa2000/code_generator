@@ -52,6 +52,7 @@ class ANSICodeFormatter(CodeFormatter):
         self,
         writer,
         text=None,
+        braces=True,
         indent=None,
         endline=True,
         postfix=None,
@@ -70,7 +71,8 @@ class ANSICodeFormatter(CodeFormatter):
         else:
             self.text = text
         self.endline = endline
-        self.postfix = postfix is None and self.code_layout.postfix or postfix
+        self.postfix = self.code_layout.postfix if postfix is None else postfix
+        self.braces = braces
 
     def __call__(self, text, indent=None, endline=True):
         self.line(text, indent=indent, endline=endline)
@@ -78,18 +80,28 @@ class ANSICodeFormatter(CodeFormatter):
     def __enter__(self):
         """Open code block."""
         if self.endline:
-            self.line(self.text, endline=self.endline)
-            self.line("{")
+            if self.text:
+                self.line(self.text, endline=self.endline)
+            if self.braces:
+                self.line("{")
         else:
             text = self.text and f"{self.text} " or ""
-            self.line(f"{text}{{")
+            if self.braces:
+                self.line(f"{text}{{")
+            else:
+                if text:
+                    self.line(f"{text}")
         self.indent_level += 1
         return self
 
     def __exit__(self, *_):
         """Close code block."""
         self.indent_level -= 1
-        self.line("}" + self.postfix)
+        if self.braces:
+            self.line("}" + self.postfix)
+        else:
+            if self.postfix:
+                self.line(self.postfix)
 
     def line(self, text, indent=None, endline=True):
         """Write one line into writer."""

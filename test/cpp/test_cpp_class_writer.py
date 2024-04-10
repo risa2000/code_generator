@@ -106,6 +106,7 @@ class TestCppClassStringIo(unittest.TestCase):
             {
             public:
                 static int GetVar();
+            private:
                 static const int m_var;
             };
 
@@ -118,7 +119,6 @@ class TestCppClassStringIo(unittest.TestCase):
 
             class ChildClass : public ParentClass
             {
-            public:
             };"""
         )
 
@@ -155,9 +155,7 @@ class TestCppClassStringIo(unittest.TestCase):
             public:
                 class NestedClass
                 {
-                public:
                 };
-
             };"""
         )
 
@@ -232,9 +230,9 @@ class TestCppClassStringIo(unittest.TestCase):
             """\
             class MyClass
             {
-            public:
                 static const char* Array[];
             };
+
             static const char* MyClass::Array[] = {Item1, Item2, Item3};"""
         )
 

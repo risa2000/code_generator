@@ -103,7 +103,7 @@ class SourceFile:
         """
         self.write(text, indent, endline)
 
-    def block(self, text, endline=True, postfix=None):
+    def block(self, text=None, endline=True, postfix=None, braces=True):
         """
         Returns a stub for C++ {} close
         Supports 'with' semantic, i.e.
@@ -112,7 +112,7 @@ class SourceFile:
         if postfix is None:
             postfix = self.code_formatter.code_layout.postfix
         return self.code_formatter(
-            self.out, text=text, endline=endline, postfix=postfix
+            self.out, text=text, endline=endline, postfix=postfix, braces=braces
         )
 
     def newline(self, n=1):
