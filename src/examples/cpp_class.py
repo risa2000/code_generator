@@ -1,4 +1,4 @@
-from code_generation.cpp import CppSourceFile, CppClass, CppVariable
+from code_gen.cpp import CppSourceFile, CppClass, CppVariable
 
 __doc__ = """Example of generating C++ class and struct
 

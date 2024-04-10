@@ -29,7 +29,7 @@ in C/C++ and allows explicit targeting of one or the other.
 
 #### Python code
 ```python
-from code_generation.cpp import CppSourceFile, CppVariable
+from code_gen.cpp import CppSourceFile, CppVariable
 
 cpp = CppSourceFile('example.cpp')
 cpp('int i = 0;')
@@ -54,7 +54,7 @@ extern char* name;
 
 #### Python code
 ```python
-from code_generation.cpp import CppSourceFile, CppFunction
+from code_gen.cpp import CppSourceFile, CppFunction
 
 def handle_to_factorial(cpp):
     cpp('return n < 1 ? 1 : (n * factorial(n - 1));')
@@ -86,7 +86,7 @@ constexpr int factorial(int n) {
 
 #### Python code
 ```python
-from code_generation.cpp import CppSourceFile
+from code_gen.cpp import CppSourceFile
 
 cpp = CppSourceFile('example.cpp')
 
@@ -113,7 +113,7 @@ public:
 #### Python code
 
 ```python
-from code_generation.cpp import CppSourceFile, CppClass, CppVariable
+from code_gen.cpp import CppSourceFile, CppClass, CppVariable
 
 cpp = CppSourceFile('example.cpp')
 header = CppSourceFile('example.h')
@@ -150,7 +150,7 @@ static const size_t MyClass::m_var = 255;
 
 #### CppSourcešFile
 
-Module `code_generation.cpp` provides the tools for C/C++ code generating and
+Module `code_gen.cpp` provides the tools for C/C++ code generating and
 formatting functionality.
  
 The Python code typically starts with `CppSourceFile` instance (`cpp`), which

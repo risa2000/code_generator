@@ -2,7 +2,7 @@ import unittest
 import io
 from textwrap import dedent
 
-from code_generation.cpp import (
+from code_gen.cpp import (
     CppSourceFile,
     CppVariable,
     CppClassScope,

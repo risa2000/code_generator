@@ -2,7 +2,7 @@ import unittest
 import io
 from textwrap import dedent
 
-from code_generation.cpp import CppSourceFile, CppFunction
+from code_gen.cpp import CppSourceFile, CppFunction
 
 __doc__ = """
 Unit tests for C++ code generator

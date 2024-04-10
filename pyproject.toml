@@ -5,8 +5,13 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["examples"]
+namespaces = false
+
 [project]
-name = "cpp_code_gen"
+name = "code_gen"
 requires-python = ">= 3.8"
 version = "0.9.1"
 
@@ -44,6 +49,6 @@ classifiers = [
 keywords = ["Cpp", "Python", "codegen"]
 
 [project.urls]
-Homepage = "https://github.com/risa2000/cpp_code_gen"
-Repository = "https://github.com/risa2000/cpp_code_gen.git"
-Issues = "https://github.com/risa2000/cpp_code_gen/issues"
+Homepage = "https://github.com/risa2000/code_gen"
+Repository = "https://github.com/risa2000/code_gen.git"
+Issues = "https://github.com/risa2000/code_gen/issues"

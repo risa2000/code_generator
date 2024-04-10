@@ -1,4 +1,4 @@
-from code_generation.cpp import CppSourceFile, CppEnum
+from code_gen.cpp import CppSourceFile, CppEnum
 
 __doc__ = """Example of generating C++ enum and enum class
 

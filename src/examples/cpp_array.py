@@ -1,4 +1,4 @@
-from code_generation.cpp import CppSourceFile, CppArray
+from code_gen.cpp import CppSourceFile, CppArray
 
 __doc__ = """Example of generating C++ array
 

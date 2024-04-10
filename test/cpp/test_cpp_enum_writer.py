@@ -2,7 +2,7 @@ import unittest
 import io
 from textwrap import dedent
 
-from code_generation.cpp import CppSourceFile, CppEnum
+from code_gen.cpp import CppSourceFile, CppEnum
 from test.comparing_tools import normalize_code, debug_dump, is_debug
 
 __doc__ = """Unit tests for C++ code generator

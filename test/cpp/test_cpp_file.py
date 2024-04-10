@@ -2,7 +2,7 @@ import os
 import unittest
 import filecmp
 
-from code_generation.cpp import (
+from code_gen.cpp import (
     CppSourceFile,
     CppVariable,
     CppEnum,

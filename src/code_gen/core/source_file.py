@@ -1,4 +1,4 @@
-from code_generation.core.code_formatter import CodeFormat, CodeFormatterFactory
+from code_gen.core.code_formatter import CodeFormat, CodeFormatterFactory
 
 __doc__ = """
 Simple and straightforward code generator that could be used for generating code
