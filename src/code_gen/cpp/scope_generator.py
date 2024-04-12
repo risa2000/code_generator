@@ -190,12 +190,14 @@ class CppClassScope(CppLanguageElement):
         for var_item in static_vars:
             var_item.definition().render_to_string(cpp)
 
-        if self.array_members:
+        if static_vars and self.array_members:
             cpp.newline()
 
         for arr_item in self.array_members:
             arr_item.definition().render_to_string(cpp)
-        cpp.newline()
+
+        if static_vars or self.array_members:
+            cpp.newline()
 
     def render_methods_implementation(self, cpp):
         # generate methods implementation section
@@ -208,13 +210,11 @@ class CppClassScope(CppLanguageElement):
         # do the same for nested classes
         for class_item in self.internal_class_elements:
             class_item.render_to_string_implementation(cpp)
-            cpp.newline()
 
     def render_internal_scopes_implementation(self, cpp):
         # do the same for nested classes
         for scope_item in self.internal_scopes:
             scope_item.render_to_string_implementation(cpp)
-            cpp.newline()
 
     def render_to_string_implementation(self, cpp):
         """
