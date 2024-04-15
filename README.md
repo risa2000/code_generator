@@ -40,7 +40,7 @@ x_variable.render_to_string(cpp)
 name_variable = CppVariable(name='name', type='char*', extern=True)
 name_variable.render_to_string(cpp)
 
-cpp.close())
+cpp.close()
 ```
 
 #### Generated C++ code
@@ -70,7 +70,7 @@ factorial_function = CppFunction(name='factorial',
 factorial_function.add_argument('int n')
 factorial_function.render_to_string(cpp)
 
-cpp.close())
+cpp.close()
 ```
 
 #### Generated C++ code
@@ -129,7 +129,7 @@ cpp_class.render_to_string_declaration(header)
 cpp_class.render_to_string_implementation(cpp)
 
 cpp.close()
-header.close())
+header.close()
 ```
  
 #### Generated C++ declaration
@@ -148,7 +148,7 @@ static const size_t MyClass::m_var = 255;
 
 ### Implementation Notes
 
-#### CppSourcešFile
+#### CppSourceFile
 
 Module `code_gen` provides the tools for C/C++ code generating and
 formatting functionality.
