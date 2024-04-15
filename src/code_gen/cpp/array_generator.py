@@ -1,4 +1,4 @@
-from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from .language_element import CppLanguageElement
 
 
 # noinspection PyUnresolvedReferences
@@ -54,20 +54,6 @@ class CppArray(CppLanguageElement):
         # array elements
         self.items = []
         self.init_properties(properties)
-
-    def declaration(self):
-        """
-        @return: CppDeclaration wrapper, that could be used
-        for declaration rendering using render_to_string(cpp) interface
-        """
-        return CppDeclaration(self)
-
-    def definition(self):
-        """
-        @return: CppImplementation wrapper, that could be used
-        for definition rendering using render_to_string(cpp) interface
-        """
-        return CppImplementation(self)
 
     def add_array_item(self, item):
         """

@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from .language_element import CppDeclaration, CppImplementation
+from .language_element import CppLanguageElement
 from .function_generator import CppFunction
 from .scope_generator import CppClassScope
 
@@ -108,8 +108,8 @@ class CppClass(CppClassScope):
             self.is_override = False
             self.is_final = False
             self.arguments = []
-            self.implementation = properties.get("implementation")
-            self.documentation = properties.get("documentation")
+            self.implementation = None
+            self.documentation = None
             self.init_properties(properties)
 
         def add_argument(self, argument):
@@ -130,20 +130,6 @@ class CppClass(CppClassScope):
             """
             if self.implementation is not None:
                 self.implementation(cpp)
-
-        def declaration(self):
-            """
-            @return: CppDeclaration wrapper, that could be used
-            for declaration rendering using render_to_string(cpp) interface
-            """
-            return CppDeclaration(self)
-
-        def definition(self):
-            """
-            @return: CppImplementation wrapper, that could be used
-            for definition rendering using render_to_string(cpp) interface
-            """
-            return CppImplementation(self)
 
         def short_header_declaration_to_string(self):
             header = [
@@ -180,6 +166,12 @@ class CppClass(CppClassScope):
             self._sanity_check()
             if self.documentation:
                 cpp(dedent(self.documentation))
+
+            if self.implementation is None:
+                raise RuntimeError(
+                    f"No implementation handle for the method {self.name}"
+                )
+
             with cpp.block(self.short_header_declaration_to_string()) as block:
                 self.implementation(block)
 
@@ -344,6 +336,26 @@ class CppClass(CppClassScope):
             Final functions must be virtual
             """
             return "final" if self.is_final else ""
+
+    class CppCtor(CppMethod):
+        """Constructor method."""
+
+        PROPERTIES = CppLanguageElement.PROPERTIES | {
+            "arguments",
+            "initializers",
+            "implementation",
+            "documentation",
+        }
+
+        def __init__(self, **properties):
+            # arguments are plain strings
+            # e.g. 'int* a', 'const string& s', 'size_t sz = 10'
+            super().__init__()
+            self.arguments = []
+            self.initializers = []
+            self.implementation = None
+            self.documentation = None
+            self.init_properties(properties)
 
     def __init__(self, **properties):
         super().__init__()

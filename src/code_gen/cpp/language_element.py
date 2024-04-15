@@ -138,6 +138,20 @@ class CppLanguageElement:
         """
         raise NotImplementedError("CppLanguageElement is an abstract class")
 
+    def render_to_string_declaration(self, cpp):
+        """
+        @param: cpp - handle that supports code generation interface (see source_file.py)
+        Typically it is passed to all child elements so that render their content
+        """
+        raise NotImplementedError("CppLanguageElement is an abstract class")
+
+    def render_to_string_implementation(self, cpp):
+        """
+        @param: cpp - handle that supports code generation interface (see source_file.py)
+        Typically it is passed to all child elements so that render their content
+        """
+        raise NotImplementedError("CppLanguageElement is an abstract class")
+
     def parent_qualifier(self):
         """
         Generate string for class name qualifiers
@@ -165,3 +179,17 @@ class CppLanguageElement:
         MyClass::NestedClass::Method()
         """
         return f"{self.parent_qualifier()}{self.name}"
+
+    def declaration(self):
+        """
+        @return: CppDeclaration wrapper, that could be used
+        for declaration rendering using render_to_string(cpp) interface
+        """
+        return CppDeclaration(self)
+
+    def definition(self):
+        """
+        @return: CppImplementation wrapper, that could be used
+        for definition rendering using render_to_string(cpp) interface
+        """
+        return CppImplementation(self)

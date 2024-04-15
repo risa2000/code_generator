@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from .language_element import CppLanguageElement
 
 
 class CppFunction(CppLanguageElement):
@@ -87,20 +87,6 @@ class CppFunction(CppLanguageElement):
         """
         if self.implementation is not None:
             self.implementation(cpp)
-
-    def declaration(self):
-        """
-        @return: CppDeclaration wrapper, that could be used
-        for declaration rendering using render_to_string(cpp) interface
-        """
-        return CppDeclaration(self)
-
-    def definition(self):
-        """
-        @return: CppImplementation wrapper, that could be used
-        for definition rendering using render_to_string(cpp) interface
-        """
-        return CppImplementation(self)
 
     def render_to_string(self, cpp):
         """Function is rendered as with implementation"""

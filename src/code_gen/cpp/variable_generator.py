@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from .language_element import CppLanguageElement
 
 __doc__ = """The module encapsulates C++ code generation logics for main C++ language primitives:
 classes, methods and functions, variables, enums.
@@ -109,20 +109,6 @@ class CppVariable(CppLanguageElement):
         b = 20;
         """
         return f"{self.name} = {value}"
-
-    def declaration(self):
-        """
-        @return: CppDeclaration wrapper, that could be used
-        for declaration rendering using render_to_string(cpp) interface
-        """
-        return CppDeclaration(self)
-
-    def definition(self):
-        """
-        @return: CppImplementation wrapper, that could be used
-        for definition rendering using render_to_string(cpp) interface
-        """
-        return CppImplementation(self)
 
     def render_to_string(self, cpp):
         """

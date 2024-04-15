@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from .language_element import CppLanguageElement, CppDeclaration, CppImplementation
+from .language_element import CppLanguageElement
 
 
 class CppClassScope(CppLanguageElement):
@@ -234,17 +234,3 @@ class CppClassScope(CppLanguageElement):
         """
         self.render_to_string_declaration(cpp)
         self.render_to_string_implementation(cpp)
-
-    def declaration(self):
-        """
-        @return: CppDeclaration wrapper, that could be used
-        for declaration rendering using render_to_string(cpp) interface
-        """
-        return CppDeclaration(self)
-
-    def definition(self):
-        """
-        @return: CppImplementation wrapper, that could be used
-        for definition rendering using render_to_string(cpp) interface
-        """
-        return CppImplementation(self)
