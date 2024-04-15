@@ -27,11 +27,25 @@ class TestCppClassStringIo(unittest.TestCase):
             )
         )
 
+        # Add a CppVariable to the class
+        cpp_class.add_variable(CppVariable(name="m_var2", type="bool"))
+
         # Define a function body for the CppMethod
         def body(cpp):
             cpp("return m_var;")
 
+        def ctor_body(cpp):
+            pass
+
         # Add a CppMethod to the class
+        cpp_class.add_method(
+            CppClass.CppCtor(
+                name="MyClass",
+                implementation=ctor_body,
+                initializers=["m_var2{ false }"],
+            )
+        )
+
         cpp_class.add_method(
             CppClass.CppMethod(
                 name="GetVar", ret_type="size_t", is_static=True, implementation=body
@@ -46,11 +60,17 @@ class TestCppClassStringIo(unittest.TestCase):
             """\
             struct MyClass
             {
+                MyClass();
                 static size_t GetVar();
                 static const size_t m_var;
+                bool m_var2;
             };
 
             static const size_t MyClass::m_var = 255;
+
+            MyClass::MyClass() : m_var2{ false }
+            {
+            }
 
             size_t MyClass::GetVar()
             {

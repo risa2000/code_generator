@@ -142,6 +142,9 @@ class CppClass(CppClassScope):
             ]
             return " ".join(h for h in header if h)
 
+        def short_header_implementation_to_string(self):
+            return self.short_header_declaration_to_string()
+
         def full_header_implementation_to_string(self):
             header = [
                 f"{self._ret_type()}",
@@ -172,7 +175,7 @@ class CppClass(CppClassScope):
                     f"No implementation handle for the method {self.name}"
                 )
 
-            with cpp.block(self.short_header_declaration_to_string()) as block:
+            with cpp.block(self.short_header_implementation_to_string()) as block:
                 self.implementation(block)
 
         def render_to_string_declaration(self, cpp):
@@ -356,6 +359,61 @@ class CppClass(CppClassScope):
             self.implementation = None
             self.documentation = None
             self.init_properties(properties)
+
+        def _sanity_check(self):
+            """
+            Check whether attributes compose a correct C++ code
+            """
+            PROHIBITED_ATTRS = [
+                "ret_type",
+                "static",
+                "constexpr",
+                "virtual",
+                "inline",
+                "pure_virtual",
+                "const",
+                "override",
+                "final",
+            ]
+
+            for attr in PROHIBITED_ATTRS:
+                attr_val = getattr(self, attr, None) or getattr(
+                    self, f"is_{attr}", None
+                )
+                if attr_val:
+                    raise ValueError(f"{self.name} ctor cannot be declared with {attr}")
+
+        def short_header_declaration_to_string(self):
+            return f"{self.name}({self.args()})"
+
+        def short_header_implementation_to_string(self):
+            header = [
+                f"{self.name}({self.args()})",
+                f"{self._member_initializers()}",
+            ]
+            return " ".join(h for h in header if h)
+
+        def full_header_implementation_to_string(self):
+            header = [
+                f"{self.fully_qualified_name()}({self.args()})",
+                f"{self._member_initializers()}",
+            ]
+            return " ".join(h for h in header if h)
+
+        def _member_initializers(self):
+            """Return member initializer list for ctor implementation."""
+            if not self.initializers:
+                return None
+
+            out_list = []
+            started = False
+            for member_initializer in self.initializers:
+                if not started:
+                    out_list.append(f": {member_initializer}")
+                    started = True
+                else:
+                    out_list.append(member_initializer)
+            return ", ".join(out_list)
 
     def __init__(self, **properties):
         super().__init__()
