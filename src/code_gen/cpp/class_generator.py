@@ -405,9 +405,15 @@ class CppClass(CppClassScope):
             if not self.initializers:
                 return None
 
+            initializers = (
+                self.initializers()
+                if callable(self.initializers)
+                else self.initializers
+            )
+
             out_list = []
             started = False
-            for member_initializer in self.initializers:
+            for member_initializer in initializers:
                 if not started:
                     out_list.append(f": {member_initializer}")
                     started = True
