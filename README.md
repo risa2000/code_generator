@@ -1,7 +1,7 @@
 # Pythonic C/C++ Code Generator
 
-Using a simple abstract Python interface allows generating source code for
-basic C/C++ constructs:
+Simple abstract Python interface for generating C/C++ source code for basic
+C/C++ constructs:
 * variables
 * enums
 * arrays
@@ -150,7 +150,7 @@ static const size_t MyClass::m_var = 255;
 
 #### CppSourcešFile
 
-Module `code_gen.cpp` provides the tools for C/C++ code generating and
+Module `code_gen` provides the tools for C/C++ code generating and
 formatting functionality.
  
 The Python code typically starts with `CppSourceFile` instance (`cpp`), which
