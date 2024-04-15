@@ -16,10 +16,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.9
+    - name: Set up Python 3.11
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.11
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -35,12 +35,9 @@ jobs:
       run: |
         python release_package.py --mode install
         python -m test.cpp.test_cpp_array_writer
-        python -m test.cpp.test_cpp_enum_writer
         python -m test.cpp.test_cpp_class_writer
+        python -m test.cpp.test_cpp_enum_writer
+        python -m test.cpp.test_cpp_file
         python -m test.cpp.test_cpp_function_writer
+        python -m test.cpp.test_cpp_scope_writer
         python -m test.cpp.test_cpp_variable_writer
-        python -m test.java.test_java_array_writer
-        python -m test.java.test_java_enum_writer
-        python -m test.java.test_java_class_writer
-        python -m test.java.test_java_function_writer
-        python -m test.java.test_java_variable_writer
