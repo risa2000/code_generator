@@ -1,6 +1,7 @@
 from textwrap import dedent
 
 from .language_element import CppLanguageElement
+from .type_base_generator import CppTypeBase
 
 __doc__ = """The module encapsulates C++ code generation logics for main C++ language primitives:
 classes, methods and functions, variables, enums.
@@ -79,33 +80,27 @@ class CppVariable(CppLanguageElement):
     """
 
     PROPERTIES = CppLanguageElement.PROPERTIES | {
-        "type",
-        "is_static",
-        "is_extern",
-        "is_const",
-        "is_constexpr",
         "value",
         "documentation",
     }
 
     def __init__(self, **properties):
         super().__init__()
-        self.type = None
-        self.is_static = False
-        self.is_extern = False
-        self.is_const = False
-        self.is_constexpr = False
+        self.type = CppTypeBase(**properties)
         self.value = None
         self.documentation = None
         self.init_properties(properties)
 
-    def assignment(self, value):
+    def _declaration(self, local_scope):
+        return f"{self.type.scoped_name(local_scope)} {self.scoped_name(local_scope)}"
+
+    def _assignment(self, value, local_scope):
         """
         Generates assignment statement for the variable, e.g.
         a = 10;
         b = 20;
         """
-        return f"{self.name} = {value}"
+        return f"{self._declaration(local_scope)} = {value}"
 
     def render_to_string(self, cpp):
         """
@@ -115,30 +110,16 @@ class CppVariable(CppLanguageElement):
         const double b = M_PI;
         """
         self._sanity_check()
-        if self.is_class_member() and not (self.is_static and self.is_const):
+        if self.is_class_member() and not (self.type.is_static and self.type.is_const):
             raise RuntimeError(
                 "For class member variables use definition() and declaration() methods"
             )
-        if self.is_extern:
-            declarators = [
-                f"{self._extern()}",
-                f"{self.type}",
-                f"{self.name};",
-            ]
-            declaration = " ".join(d for d in declarators if d)
-            cpp(declaration)
+        if self.type.is_extern:
+            cpp(f"{self._declaration(local_scope=True)};")
         else:
             if self.documentation:
                 cpp(dedent(self.documentation))
-            declarators = [
-                f"{self._static()}",
-                f"{self._const()}",
-                f"{self._constexpr()}",
-                f"{self.type}",
-                f"{self.assignment(self._init_value())};",
-            ]
-            declaration = " ".join(d for d in declarators if d)
-            cpp(declaration)
+            cpp(f"{self._assignment(self.value, local_scope=True)};")
 
     def render_to_string_declaration(self, cpp):
         """
@@ -152,16 +133,10 @@ class CppVariable(CppLanguageElement):
 
         if self.documentation and self.is_class_member():
             cpp(dedent(self.documentation))
-        declarators = [
-            f"{self._static()}",
-            f"{self._extern()}",
-            f"{self._const()}",
-            f"{self._constexpr()}",
-            f"{self.type}",
-            f"{self.name if not self.is_constexpr else self.assignment(self._init_value())};",
-        ]
-        declaration = " ".join(d for d in declarators if d)
-        cpp(declaration)
+        if self.type.is_constexpr:
+            cpp(f"{self._assignment(self.value, local_scope=True)};")
+        else:
+            cpp(f"{self._declaration(local_scope=True)};")
 
     def render_to_string_implementation(self, cpp):
         """
@@ -182,36 +157,24 @@ class CppVariable(CppLanguageElement):
             )
 
         # generate definition for the static class member
-        if not self.is_constexpr:
-            if self.is_static:
-                declarators = [
-                    f"{self._static()}",
-                    f"{self._const()}",
-                    f"{self._constexpr()}",
-                    f"{self.type}",
-                    f"{self.fully_qualified_name()} = {self._init_value()};",
-                ]
-                declaration = " ".join(d for d in declarators if d)
-                cpp(declaration)
+        if not self.type.is_constexpr:
+            if self.type.is_static:
+                cpp(f"{self._assignment(self.value, local_scope=False)};")
             # generate definition for non-static static class member, e.g. m_var(0)
             # (string for the constructor initialization list)
             else:
-                cpp(f"{self.name}({self._init_value()})")
+                cpp(f"{self.scoped_name(local_scope=True)}({self._init_value()});")
+        else:
+            raise ValueError(
+                f"Cannot generate implementation for 'constexpr' variable {self.name}"
+            )
 
     def _sanity_check(self):
         """
         @raise: ValueError, if some properties are not valid
         """
-        if self.is_const and self.is_constexpr:
-            raise ValueError(
-                "Variable object can be either 'const' or 'constexpr', not both"
-            )
-        if self.is_constexpr and not self.value:
+        if self.type.is_constexpr and not self.value:
             raise ValueError("Variable object must be initialized when 'constexpr'")
-        if self.is_static and self.is_extern:
-            raise ValueError(
-                "Variable object can be either 'extern' or 'static', not both"
-            )
 
     def _static(self):
         """

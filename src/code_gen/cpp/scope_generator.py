@@ -18,24 +18,20 @@ class CppClassScope(CppLanguageElement):
         self.documentation = None
         self.scope = None
         self.init_properties(properties)
-
         # aggregated classes
         self.internal_class_elements = []
-
         # class members
         self.variable_members = []
-
         # array class members
         self.array_members = []
-
         # class methods
         self.methods = []
-
         # class scoped enums
         self.scoped_enums = []
-
         # internal scopes
         self.internal_scopes = []
+        # postfix lines
+        self.postfix_lines = []
 
     # add class members
     def add_enum(self, enum):
@@ -82,6 +78,12 @@ class CppClassScope(CppLanguageElement):
         """
         cpp_scope.ref_to_parent = self
         self.internal_scopes.append(cpp_scope)
+
+    def add_postfix_line(self, line):
+        """
+        Add an arbitrary line, which will be rendered at the end of the scope.
+        """
+        self.postfix_lines.append(line)
 
     # render declaration
     def anything_to_declare_local(self):
@@ -153,6 +155,13 @@ class CppClassScope(CppLanguageElement):
         for scope_item in self.internal_scopes:
             scope_item.declaration().render_to_string(cpp)
 
+    def render_postfix_lines(self, cpp):
+        """
+        Generate postfix lines in the scope. Could be anything.
+        """
+        for postfix_line in self.postfix_lines:
+            cpp(postfix_line)
+
     def render_to_string_declaration(self, cpp):
         """
         Render to string scope declaration.
@@ -172,6 +181,7 @@ class CppClassScope(CppLanguageElement):
         self.render_variables_declaration(cpp)
         self.render_array_declaration(cpp)
         self.render_internal_scopes_declarations(cpp)
+        self.render_postfix_lines(cpp)
 
     # render implementation
     def render_static_members_implementation(self, cpp):
@@ -182,7 +192,7 @@ class CppClassScope(CppLanguageElement):
         """
         # generate definition for static variables
         static_vars = [
-            variable for variable in self.variable_members if variable.is_static
+            variable for variable in self.variable_members if variable.type.is_static
         ]
 
         for var_item in static_vars:

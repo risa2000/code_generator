@@ -159,6 +159,14 @@ class CppLanguageElement:
         """
         return self.scoped_name(local_scope=False)
 
+    @staticmethod
+    def resolved_name(elem_type, local_scope):
+        if isinstance(elem_type, str):
+            return elem_type
+        if isinstance(elem_type, CppLanguageElement):
+            return elem_type.scoped_name(local_scope)
+        raise ValueError(f"CppLanguageElement type {str(elem_type)} is not supported")
+
     def scoped_name(self, local_scope):
         return self.name if local_scope else f"{self._parent_qualifier()}{self.name}"
 

@@ -514,6 +514,7 @@ class CppClass(CppClassScope):
             self.class_interface(block)
             self.private_class_members(block)
             self.render_internal_scopes_declarations(block)
+            self.render_postfix_lines(block)
 
     def render_to_string_implementation(self, cpp):
         """
