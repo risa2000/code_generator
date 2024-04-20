@@ -2,7 +2,7 @@ import unittest
 import io
 from textwrap import dedent
 
-from code_gen.cpp import CppSourceFile, CppArray
+from code_gen.cpp import CppSourceFile, CppArray, CppClass
 from test.comparing_tools import normalize_lines
 
 __doc__ = """Unit tests for C++ code generator
@@ -44,12 +44,13 @@ class TestCppArrayStringIo(unittest.TestCase):
     def test_declaration(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
+        cls = CppClass(name="Cls")
         arr = CppArray(
             name="my_class_member_array",
             type="int",
             array_size=None,
-            is_class_member=True,
         )
+        cls.add_array(arr)
         arr.render_to_string_declaration(cpp)
         expected_output = "int my_class_member_array[];"
         self.assertEqual(expected_output, writer.getvalue().strip())
@@ -57,16 +58,17 @@ class TestCppArrayStringIo(unittest.TestCase):
     def test_implementation(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
+        cls = CppClass(name="Cls")
         arr = CppArray(
             name="m_my_static_array",
             type="int",
             array_size=None,
-            is_class_member=True,
             is_static=True,
         )
+        cls.add_array(arr)
         arr.add_array_items(["1", "2", "0"])
         arr.render_to_string_implementation(cpp)
-        expected_output = "static int m_my_static_array[] = {1, 2, 0};"
+        expected_output = "static int Cls::m_my_static_array[] = {1, 2, 0};"
         self.assertEqual(expected_output, writer.getvalue().strip())
 
     def test_missing_type(self):
@@ -78,11 +80,11 @@ class TestCppArrayStringIo(unittest.TestCase):
         self.assertRaises(RuntimeError, arr.render_to_string, None)
 
     def test_class_member_missing_name(self):
-        arr = CppArray(type="int", is_class_member=True)
+        arr = CppArray(type="int")
         self.assertRaises(RuntimeError, arr.render_to_string_declaration, None)
 
     def test_class_member_static_without_name(self):
-        arr = CppArray(type="int", is_class_member=True, is_static=True)
+        arr = CppArray(type="int", is_static=True)
         self.assertRaises(RuntimeError, arr.render_to_string_implementation, None)
 
 

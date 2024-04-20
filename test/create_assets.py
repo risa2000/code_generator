@@ -58,7 +58,6 @@ def generate_var(output_dir="."):
         CppVariable(
             name="var1",
             type="char*",
-            is_class_member=False,
             is_static=False,
             is_const=True,
             value="0",
@@ -66,7 +65,6 @@ def generate_var(output_dir="."):
         CppVariable(
             name="var2",
             type="int",
-            is_class_member=False,
             is_static=True,
             is_const=False,
             value="0",
@@ -74,7 +72,6 @@ def generate_var(output_dir="."):
         CppVariable(
             name="var3",
             type="std::string",
-            is_class_member=False,
             is_static=False,
             is_const=False,
         ),
@@ -82,7 +79,6 @@ def generate_var(output_dir="."):
             name="var4",
             type="int",
             documentation="// A number",
-            is_class_member=False,
             is_static=False,
             is_const=False,
         ),
@@ -173,7 +169,6 @@ def generate_class(output_dir="."):
         CppVariable(
             name="m_gcAnswer",
             type="size_t",
-            is_class_member=True,
             is_static=True,
             is_const=True,
             value="42",
@@ -189,7 +184,6 @@ def generate_class(output_dir="."):
             type="int",
             is_constexpr=True,
             is_static=True,
-            is_class_member=True,
             value=42,
         )
     )

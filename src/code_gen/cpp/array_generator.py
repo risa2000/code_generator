@@ -21,7 +21,6 @@ class CppArray(CppLanguageElement):
     type - string, variable type
     (is_)static - boolean, 'static' prefix
     (is_)const - boolean, 'const' prefix
-    (is_)class_member - boolean, for appropriate definition/declaration rendering
     array_size - integer, size of array if required
     newline_align - in the array definition rendering place every item on the new string
 
@@ -37,7 +36,6 @@ class CppArray(CppLanguageElement):
         "type",
         "is_static",
         "is_const",
-        "is_class_member",
         "array_size",
         "newline_align",
         "items",
@@ -48,7 +46,6 @@ class CppArray(CppLanguageElement):
         self.type = None
         self.is_static = False
         self.is_const = False
-        self.is_class_member = False
         self.array_size = 0
         self.newline_align = False
         # array elements
@@ -98,7 +95,7 @@ class CppArray(CppLanguageElement):
         For class members use render_to_string_declaration/render_to_string_implementation methods
         """
         self._sanity_check()
-        if self.is_class_member and not (self.is_static and self.is_const):
+        if self.is_class_member() and not (self.is_static and self.is_const):
             raise RuntimeError(
                 "For class member variables use definition() and declaration() methods"
             )
@@ -122,7 +119,7 @@ class CppArray(CppLanguageElement):
         static int my_class_member_array[];
         """
         self._sanity_check()
-        if not self.is_class_member:
+        if not self.is_class_member():
             raise RuntimeError(
                 "For automatic variable use its render_to_string() method"
             )
@@ -142,7 +139,7 @@ class CppArray(CppLanguageElement):
         Non-static arrays-class members do not supported
         """
         self._sanity_check()
-        if not self.is_class_member:
+        if not self.is_class_member():
             raise RuntimeError(
                 "For automatic variable use its render_to_string() method"
             )
@@ -170,7 +167,7 @@ class CppArray(CppLanguageElement):
             raise RuntimeError("Array type is not set")
         if not self.name:
             raise RuntimeError("Array name is not set")
-        if self.is_class_member and not self.name:
+        if self.is_class_member() and not self.name:
             raise RuntimeError("Class member array name is not set")
 
     def _static(self):

@@ -50,7 +50,6 @@ class CppClassScope(CppLanguageElement):
         @param: cpp_variable CppVariable instance
         """
         cpp_variable.ref_to_parent = self
-        cpp_variable.is_class_member = True
         self.variable_members.append(cpp_variable)
 
     def add_array(self, cpp_variable):
@@ -58,7 +57,6 @@ class CppClassScope(CppLanguageElement):
         @param: cpp_variable CppVariable instance
         """
         cpp_variable.ref_to_parent = self
-        cpp_variable.is_class_member = True
         self.array_members.append(cpp_variable)
 
     def add_internal_class(self, cpp_class):

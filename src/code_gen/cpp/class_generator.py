@@ -135,7 +135,7 @@ class CppClass(CppClassScope):
             header = [
                 f"{self._static()}",
                 f"{self._modifiers_front()}",
-                f"{self._ret_type()}",
+                f"{self._ret_type(local_scope=True)}",
                 f"{self.name}({self.args()})",
                 f"{self._modifiers_back()}",
                 f"{self._pure()}",
@@ -147,7 +147,7 @@ class CppClass(CppClassScope):
 
         def full_header_implementation_to_string(self):
             header = [
-                f"{self._ret_type()}",
+                f"{self._ret_type(local_scope=False)}",
                 f"{self.fully_qualified_name()}({self.args()})",
                 f"{self._const()}",
             ]
@@ -306,11 +306,16 @@ class CppClass(CppClassScope):
             """
             return "inline" if self.is_inline else ""
 
-        def _ret_type(self):
+        def _ret_type(self, local_scope):
             """
             Return type, could be in declaration or definition
             """
-            return self.ret_type if self.ret_type else ""
+            if self.ret_type:
+                if isinstance(self.ret_type, CppLanguageElement):
+                    return self.ret_type.scoped_name(local_scope)
+                else:
+                    return self.ret_type
+            return ""
 
         def _pure(self):
             """

@@ -76,7 +76,6 @@ class CppVariable(CppLanguageElement):
     value - string, value to be initialized with.
         'a = value;' for automatic variables, 'a(value)' for the class member
     documentation - string, '/// Example doxygen'
-    is_class_member - boolean, for appropriate definition/declaration rendering
     """
 
     PROPERTIES = CppLanguageElement.PROPERTIES | {
@@ -85,7 +84,6 @@ class CppVariable(CppLanguageElement):
         "is_extern",
         "is_const",
         "is_constexpr",
-        "is_class_member",
         "value",
         "documentation",
     }
@@ -97,7 +95,6 @@ class CppVariable(CppLanguageElement):
         self.is_extern = False
         self.is_const = False
         self.is_constexpr = False
-        self.is_class_member = False
         self.value = None
         self.documentation = None
         self.init_properties(properties)
@@ -118,7 +115,7 @@ class CppVariable(CppLanguageElement):
         const double b = M_PI;
         """
         self._sanity_check()
-        if self.is_class_member and not (self.is_static and self.is_const):
+        if self.is_class_member() and not (self.is_static and self.is_const):
             raise RuntimeError(
                 "For class member variables use definition() and declaration() methods"
             )
@@ -148,12 +145,12 @@ class CppVariable(CppLanguageElement):
         Generates declaration for the class member variables, for example
         int m_var;
         """
-        if not self.is_class_member:
+        if not self.is_class_member():
             raise RuntimeError(
                 "For automatic variable use its render_to_string() method"
             )
 
-        if self.documentation and self.is_class_member:
+        if self.documentation and self.is_class_member():
             cpp(dedent(self.documentation))
         declarators = [
             f"{self._static()}",
@@ -179,7 +176,7 @@ class CppVariable(CppLanguageElement):
         for non-static class members.
         That string could be used in constructor initialization string
         """
-        if not self.is_class_member:
+        if not self.is_class_member():
             raise RuntimeError(
                 "For automatic variable use its render_to_string() method"
             )

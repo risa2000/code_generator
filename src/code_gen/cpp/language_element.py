@@ -103,6 +103,10 @@ class CppLanguageElement:
         self.name = None
         self.ref_to_parent = None
 
+    def is_class_member(self):
+        """Return True if element is part of another (class/struct/scope) element."""
+        return self.ref_to_parent is not None
+
     def normalize_properties(self, properties):
         """Produce properties with normalized names, i.e. substitute "const" with "is_const"."""
         result = {}
@@ -179,6 +183,9 @@ class CppLanguageElement:
         MyClass::NestedClass::Method()
         """
         return f"{self.parent_qualifier()}{self.name}"
+
+    def scoped_name(self, local_scope):
+        return self.name if local_scope else self.fully_qualified_name()
 
     def declaration(self):
         """

@@ -1,7 +1,7 @@
 import unittest
 import io
 
-from code_gen.cpp import CppSourceFile, CppVariable
+from code_gen.cpp import CppSourceFile, CppVariable, CppClass
 
 __doc__ = """Unit tests for C++ code generator
 """
@@ -18,7 +18,6 @@ class TestCppVariableStringIo(unittest.TestCase):
         variables = CppVariable(
             name="var1",
             type="char*",
-            is_class_member=False,
             is_static=False,
             is_const=True,
             value="0",
@@ -32,7 +31,6 @@ class TestCppVariableStringIo(unittest.TestCase):
         var = CppVariable(
             name="COUNT",
             type="int",
-            is_class_member=True,
             is_const=True,
             is_constexpr=True,
             value="0",
@@ -42,31 +40,28 @@ class TestCppVariableStringIo(unittest.TestCase):
     def test_is_constexpr_no_implementation_raises(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
-        var = CppVariable(
-            name="COUNT", type="int", is_class_member=True, is_constexpr=True
-        )
+        var = CppVariable(name="COUNT", type="int", is_constexpr=True)
         self.assertRaises(ValueError, var.render_to_string, cpp)
 
     def test_is_constexpr_render_to_string(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
-        variables = CppVariable(
+        variable = CppVariable(
             name="COUNT",
             type="int",
-            is_class_member=False,
             is_constexpr=True,
             value="0",
         )
-        variables.render_to_string(cpp)
+        variable.render_to_string(cpp)
         self.assertIn("constexpr int COUNT = 0;", writer.getvalue())
 
     def test_is_constexpr_render_to_string_declaration(self):
         writer = io.StringIO()
         cpp = CppSourceFile(None, writer=writer)
-        variables = CppVariable(
-            name="COUNT", type="int", is_class_member=True, is_constexpr=True, value="0"
-        )
-        variables.render_to_string_declaration(cpp)
+        cls = CppClass(name="Cls")
+        variable = CppVariable(name="COUNT", type="int", is_constexpr=True, value="0")
+        cls.add_variable(variable)
+        variable.render_to_string_declaration(cpp)
         self.assertIn("constexpr int COUNT = 0;", writer.getvalue())
 
     def test_is_extern_static_raises(self):

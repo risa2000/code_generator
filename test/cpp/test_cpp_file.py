@@ -67,7 +67,6 @@ class TestCppFileIo(unittest.TestCase):
             CppVariable(
                 name="m_gcAnswer",
                 type="size_t",
-                is_class_member=True,
                 is_static=True,
                 is_const=True,
                 value="42",
@@ -205,7 +204,6 @@ class TestCppFileIo(unittest.TestCase):
             CppVariable(
                 name="var1",
                 type="char*",
-                is_class_member=False,
                 is_static=False,
                 is_const=True,
                 value="0",
@@ -213,7 +211,6 @@ class TestCppFileIo(unittest.TestCase):
             CppVariable(
                 name="var2",
                 type="int",
-                is_class_member=False,
                 is_static=True,
                 is_const=False,
                 value="0",
@@ -221,14 +218,12 @@ class TestCppFileIo(unittest.TestCase):
             CppVariable(
                 name="var3",
                 type="std::string",
-                is_class_member=False,
                 is_static=False,
                 is_const=False,
             ),
             CppVariable(
                 name="var3",
                 type="std::string",
-                is_class_member=False,
                 is_static=False,
                 is_const=False,
             ),
