@@ -103,11 +103,7 @@ class CppLanguageElement:
         self.name = None
         self.ref_to_parent = None
 
-    def is_class_member(self):
-        """Return True if element is part of another (class/struct/scope) element."""
-        return self.ref_to_parent is not None
-
-    def normalize_properties(self, properties):
+    def _normalize_properties(self, properties):
         """Produce properties with normalized names, i.e. substitute "const" with "is_const"."""
         result = {}
         for name, val in properties.items():
@@ -116,6 +112,26 @@ class CppLanguageElement:
             if f"is_{name}" in self.PROPERTIES:
                 result[f"is_{name}"] = val
         return result
+
+    def _parent_qualifier(self):
+        """
+        Generate string for class name qualifiers
+        Should be used for methods implementation and static class members definition.
+        Ex.
+        void MyClass::MyMethod()
+        int MyClass::m_staticVar = 0;
+
+        Supports for nested classes, e.g.
+        void MyClass::NestedClass::
+        """
+        full_parent_qualifier = ""
+        parent = self.ref_to_parent
+        # walk through all existing parents
+        while parent:
+            if parent.name is not None:
+                full_parent_qualifier = f"{parent.name}::{full_parent_qualifier}"
+            parent = parent.ref_to_parent
+        return full_parent_qualifier
 
     def init_properties(self, input_properties_dict, default_property_value=None):
         """
@@ -131,9 +147,24 @@ class CppLanguageElement:
             for name in self.PROPERTIES
             if not hasattr(self, name)
         }
-        defaults.update(self.normalize_properties(input_properties_dict))
+        defaults.update(self._normalize_properties(input_properties_dict))
         for name, val in defaults.items():
             setattr(self, name, val)
+
+    def fully_qualified_name(self):
+        """
+        Generate string for fully qualified name of the element
+        Ex.
+        MyClass::NestedClass::Method()
+        """
+        return self.scoped_name(local_scope=False)
+
+    def scoped_name(self, local_scope):
+        return self.name if local_scope else f"{self._parent_qualifier()}{self.name}"
+
+    def is_class_member(self):
+        """Return True if element is part of another (class/struct/scope) element."""
+        return self.ref_to_parent is not None
 
     def render_to_string(self, cpp):
         """
@@ -155,37 +186,6 @@ class CppLanguageElement:
         Typically it is passed to all child elements so that render their content
         """
         raise NotImplementedError("CppLanguageElement is an abstract class")
-
-    def parent_qualifier(self):
-        """
-        Generate string for class name qualifiers
-        Should be used for methods implementation and static class members definition.
-        Ex.
-        void MyClass::MyMethod()
-        int MyClass::m_staticVar = 0;
-
-        Supports for nested classes, e.g.
-        void MyClass::NestedClass::
-        """
-        full_parent_qualifier = ""
-        parent = self.ref_to_parent
-        # walk through all existing parents
-        while parent:
-            if parent.name is not None:
-                full_parent_qualifier = f"{parent.name}::{full_parent_qualifier}"
-            parent = parent.ref_to_parent
-        return full_parent_qualifier
-
-    def fully_qualified_name(self):
-        """
-        Generate string for fully qualified name of the element
-        Ex.
-        MyClass::NestedClass::Method()
-        """
-        return f"{self.parent_qualifier()}{self.name}"
-
-    def scoped_name(self, local_scope):
-        return self.name if local_scope else self.fully_qualified_name()
 
     def declaration(self):
         """
