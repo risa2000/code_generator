@@ -40,4 +40,5 @@ jobs:
         python -m test.cpp.test_cpp_file
         python -m test.cpp.test_cpp_function_writer
         python -m test.cpp.test_cpp_scope_writer
+        python -m test.cpp.test_cpp_type_gen
         python -m test.cpp.test_cpp_variable_writer

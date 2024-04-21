@@ -1,11 +1,12 @@
 __doc__ = """Run following tests:
         python test.cpp.test_cpp_array_writer
-        python test.cpp.test_cpp_enum_writer
-        python test.cpp.test_cpp_scope_writer
         python test.cpp.test_cpp_class_writer
-        python test.cpp.test_cpp_function_writer
-        python test.cpp.test_cpp_variable_writer
+        python test.cpp.test_cpp_enum_writer
         python test.cpp.test_cpp_file
+        python test.cpp.test_cpp_function_writer
+        python test.cpp.test_cpp_scope_writer
+        python test.cpp.test_cpp_type_gen
+        python test.cpp.test_cpp_variable_writer
 """
 
 import subprocess
@@ -34,12 +35,13 @@ if __name__ == "__main__":
     command_line_args = sys.argv[1:]
     test_files = [
         "test.cpp.test_cpp_array_writer",
-        "test.cpp.test_cpp_enum_writer",
-        "test.cpp.test_cpp_scope_writer",
         "test.cpp.test_cpp_class_writer",
-        "test.cpp.test_cpp_function_writer",
-        "test.cpp.test_cpp_variable_writer",
+        "test.cpp.test_cpp_enum_writer",
         "test.cpp.test_cpp_file",
+        "test.cpp.test_cpp_function_writer",
+        "test.cpp.test_cpp_scope_writer",
+        "test.cpp.test_cpp_type_gen",
+        "test.cpp.test_cpp_variable_writer",
     ]
 
     if 'black' in command_line_args:

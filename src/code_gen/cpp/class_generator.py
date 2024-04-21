@@ -311,10 +311,7 @@ class CppClass(CppClassScope):
             Return type, could be in declaration or definition
             """
             if self.ret_type:
-                if isinstance(self.ret_type, CppLanguageElement):
-                    return self.ret_type.scoped_name(local_scope)
-                else:
-                    return self.ret_type
+                return CppLanguageElement.resolved_name(self.ret_type, local_scope)
             return ""
 
         def _pure(self):

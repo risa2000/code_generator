@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from .language_element import CppLanguageElement
-from .type_base_generator import CppTypeBase
+from .type_base_generator import CppBaseType
 
 __doc__ = """The module encapsulates C++ code generation logics for main C++ language primitives:
 classes, methods and functions, variables, enums.
@@ -86,7 +86,7 @@ class CppVariable(CppLanguageElement):
 
     def __init__(self, **properties):
         super().__init__()
-        self.type = CppTypeBase(**properties)
+        self.type = CppBaseType(**properties)
         self.value = None
         self.documentation = None
         self.init_properties(properties)
@@ -101,6 +101,9 @@ class CppVariable(CppLanguageElement):
         b = 20;
         """
         return f"{self._declaration(local_scope)} = {value}"
+
+    def set_value(self, value):
+        self.value = value
 
     def render_to_string(self, cpp):
         """
@@ -135,6 +138,8 @@ class CppVariable(CppLanguageElement):
             cpp(dedent(self.documentation))
         if self.type.is_constexpr:
             cpp(f"{self._assignment(self.value, local_scope=True)};")
+        elif self.value and not self.type.is_static:
+            cpp(f"{self._declaration(local_scope=True)}{{{self._init_value()}}};")
         else:
             cpp(f"{self._declaration(local_scope=True)};")
 

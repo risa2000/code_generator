@@ -4,10 +4,10 @@ from .language_element import CppLanguageElement
 
 
 # noinspection PyUnresolvedReferences
-class CppTypeBase(CppLanguageElement):
+class CppBaseType(CppLanguageElement):
     """
-    The Python class that provides the base class for type derived elements:
-        array, variable, template
+    The Python class that provides the base type used in other elements:
+        array, variable, template type
     """
 
     PROPERTIES = CppLanguageElement.PROPERTIES | {
@@ -30,6 +30,13 @@ class CppTypeBase(CppLanguageElement):
         self.is_ref = False
         self.documentation = None
         self.init_properties(properties)
+
+    @staticmethod
+    def normalize(ctype):
+        """Return new instance of CppBaseType if ctype is str."""
+        if isinstance(ctype, str):
+            return CppBaseType(type=ctype)
+        return ctype
 
     def scoped_name(self, local_scope):
         self._sanity_check()
@@ -80,3 +87,24 @@ class CppTypeBase(CppLanguageElement):
 
     def _ref(self):
         return "&" if self.is_ref else ""
+
+
+class CppTemplateType(CppBaseType):
+    """Implements an abstraction of a C++ templated type."""
+
+    PROPERTIES = CppBaseType.PROPERTIES | {
+        "template_args",
+    }
+
+    def __init__(self, **properties):
+        super().__init__()
+        self.template_args = []
+        self.init_properties(properties)
+
+    def scoped_name(self, local_scope):
+        self._sanity_check()
+        s_name = super().resolved_name(self.type, local_scope)
+        t_args_names = []
+        for t_arg in self.template_args:
+            t_args_names.append(CppLanguageElement.resolved_name(t_arg, local_scope))
+        return f'{s_name}<{", ".join(t_args_names)}>'
