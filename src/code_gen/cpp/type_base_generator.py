@@ -17,6 +17,7 @@ class CppBaseType(CppLanguageElement):
         "is_const",
         "is_constexpr",
         "is_ref",
+        "is_integral",
         "documentation",
     }
 
@@ -28,14 +29,15 @@ class CppBaseType(CppLanguageElement):
         self.is_const = False
         self.is_constexpr = False
         self.is_ref = False
+        self.is_integral = False
         self.documentation = None
         self.init_properties(properties)
 
     @staticmethod
-    def normalize(ctype):
+    def normalize(ctype, **properties):
         """Return new instance of CppBaseType if ctype is str."""
         if isinstance(ctype, str):
-            return CppBaseType(type=ctype)
+            return CppBaseType(type=ctype, **properties)
         return ctype
 
     def scoped_name(self, local_scope):
