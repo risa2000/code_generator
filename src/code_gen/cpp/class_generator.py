@@ -405,7 +405,7 @@ class CppClass(CppClassScope):
         def _member_initializers(self):
             """Return member initializer list for ctor implementation."""
             if not self.initializers:
-                return None
+                return ""
 
             initializers = (
                 self.initializers()
